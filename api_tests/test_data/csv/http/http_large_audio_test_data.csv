@@ -1,0 +1,2 @@
+input_audio_language,input_audio_file,input_content_encoding,input_content_type,verify_audio_converted_status,verify_recognition_status,verify_global_confidence_score_min,verify_rtf_max
+en-US,en-US-large-audio.txt,base64,text/plain,Success,Transcribed,60,1
