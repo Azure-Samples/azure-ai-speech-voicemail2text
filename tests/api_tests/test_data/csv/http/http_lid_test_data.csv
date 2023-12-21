@@ -1,0 +1,5 @@
+lid_enabled,lid_mode,language,audio_file,content_encoding,content_type,detected_languages,expected_lid_enabled,status,recognition_status,confidence_score_min,rtf_max
+"True","Continuous","en-US, es-MX",en-US_es-MX_es-MX-es-MX_en-US.wav,base64,text/plain,"en-US, es-MX, en-US","True",Success,Transcribed,60,5
+"True","AtStartHighAccuracy","en-US, es-MX, ja-JP",en-US.txt,base64,text/plain,"en-US","True",Success,Transcribed,60,5
+"True","AtStartHighAccuracy","en-US, es-MX, ja-JP",es-MX.txt,base64,text/plain,"es-MX","True",Success,Transcribed,60,5
+"True","AtStartHighAccuracy","en-US, es-MX, ja-JP",ja-JP.txt,base64,text/plain,"ja-JP","True",Success,Transcribed,60,5

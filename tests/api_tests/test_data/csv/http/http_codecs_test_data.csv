@@ -1,0 +1,17 @@
+language,audio_file,content_encoding,content_type,status,recognition_status,confidence_score_min,rtf_max
+en-US,amr_nb_sample1.amr_nb,base64,text/plain,Success,Transcribed,60,5
+en-US,amr_nb_sample2.amr_nb,base64,text/plain,Success,Transcribed,60,5
+en-US,amr_wb_sample1.amr_wb,base64,text/plain,Success,Transcribed,60,5
+en-US,amr_wb_sample2.amr_wb,base64,text/plain,Success,Transcribed,60,5
+en-US,g711_alaw_sample1.g711,base64,text/plain,Success,Transcribed,60,5
+en-US,g711_alaw_sample2.g711,base64,text/plain,Success,Transcribed,60,5
+en-US,g711_mulaw_sample1.g711,base64,text/plain,Success,Transcribed,60,5
+en-US,g711_mulaw_sample2.g711,base64,text/plain,Success,Transcribed,60,5
+en-US,gsm610_sample1.gsm610,base64,text/plain,Success,Transcribed,60,5
+en-US,gsm610_sample2.gsm610,base64,text/plain,Success,Transcribed,60,5
+en-US,ima_adpcm_sample1.adpcm,base64,text/plain,Success,Transcribed,60,5
+en-US,ima_adpcm_sample2.adpcm,base64,text/plain,Success,Transcribed,60,5
+en-US,lpcm_sample1.pcm,base64,text/plain,Success,Transcribed,60,5
+en-US,lpcm_sample2.pcm,base64,text/plain,Success,Transcribed,60,5
+en-US,mpeg_sample1.mp3,base64,text/plain,Success,Transcribed,60,5
+en-US,mpeg_sample2.mp3,base64,text/plain,Success,Transcribed,60,5

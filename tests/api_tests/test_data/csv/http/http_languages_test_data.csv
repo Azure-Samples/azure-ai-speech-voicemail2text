@@ -1,0 +1,4 @@
+language,audio_file,content_encoding,content_type,status,recognition_status,confidence_score_min,rtf_max
+en-US,en-US5secsGoodQuality2.wav,base64,text/plain,Success,Transcribed,60,5
+es-MX,es-MX.txt,base64,text/plain,Success,Transcribed,60,5
+ja-JP,ja-JP.txt,base64,text/plain,Success,Transcribed,60,5
