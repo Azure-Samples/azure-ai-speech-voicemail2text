@@ -1,76 +1,57 @@
-<!DOCTYPE html>
+# Configuration basics
 
-<html>
+Administrators and integrators can configure V2TIC deployments following this process: 
+- Gather the specifications for your API.
+- Create a profile script and templates.
+- Create configuration and deployment files.
+- [Build and deploy V2TIC](../build-deploy/build-summary.md).
 
-<head>
+## Gather specifications
 
-  <link rel="stylesheet" href="/docs/styles.css">
+Before creating profiles and configurations, you need to know what the transcription request and response look like:
+- What are the headers and fields of the request? Which ones are mandatory? Which ones are custom headers? Languages?</li>
+- Does the response have a standard response? What is the maximum length of the transcription? Are any mandatory custom headers required to be included in the response?
 
-</head>
+For example, this could be what an incoming request from a voicemail server looks like:
 
+```
+To: &lt;carrier&gt;-cc-voicemail@iot.slough.nuancevm.com 
+    From: voice2textreply@example.com 
+    Subject: New Voice Message
+    Date: Fri, 31 Jan 2014 11:47:30 GMT
+    Message-Id: 12345-abcde-67890
+    X-Caller: 15551234567
+    X-Caller-Name: John Smith
+    X-Called: 15557654321
+    X-Called-Name: Joe Bloggs
+    X-Language: en-US
+    Content-Type: audio/wav
+    Content-Transfer-Encoding: base64
 
-<body>
+    UklGRqxhAABXQVZFZm10IBAAAAAHAAEAQB8AAEAfAAABAAgAZGF0YYBhAAD9
+    &lt;snip&gt;
+    yIS9kQ8qsgg9gAhkmAwN0ApI4YvqmBDd1Yvr+IzwGIdyOId0Wid2eId4mId6
+```
 
-<h1>Configuration basics</h1>
+You decide that the `From`, `To`, and `Message-Id` headers are mandatory.
 
-<p>Administrators and integrators can configure V2TIC deployments following this process: 
-    <ol>
-        <li>Gather the specifications for your API.</li>
-        <li>Create a profile script and templates.</li>
-        <li>Create configuration and deployment files.</li>
-        <li><a href="/docs/build-deploy/build-summary.html">Build and deploy V2TIC</a>.</li>
-    </ol>
-</p>
+For the response, you decide the `Message-Id` header is mandatory to include, and the maximum transcription length is 3000 characters (approximately 600 words).
 
-<h2>Gather specifications</h2>
+## Create a profile and templates
 
-<p>Before creating profiles and configurations, you need to know what the transcription request and response look like:</p>
+The next step is to build the profile and templates based on the requirements you've gathered.
 
-<ul>
-    <li>What are the headers and fields of the request? Which ones are mandatory? Which ones are custom headers? Languages?</li>
-    <li>Does the response have a standard response? What is the maximum length of the transcription? Are any mandatory custom headers required to be included in the response?</li>
-</ul>
+The templates are Jinja templates. To learn more about working with Jinja templates, go to [the Jinja documentation](https://jinja.palletsprojects.com/en/3.1.x/templates/). In V2TIC, these templates use the `.j2` extension. You must have at least `request.j2` and `response.j2` templates, which handle converting requests and responses, but you could have more depending on your needs.
 
-<p>For example, this could be what an incoming request from a voicemail server looks like:</p>
+Each deployment's profile and templates exist in a folder inside `etc/profiles`, with the templates in their own folder, like the samples included with the V2TIC project.
 
-<code>
-    To: &lt;carrier&gt;-cc-voicemail@iot.slough.nuancevm.com 
-        From: voice2textreply@example.com 
-        Subject: New Voice Message
-        Date: Fri, 31 Jan 2014 11:47:30 GMT
-        Message-Id: 12345-abcde-67890
-        X-Caller: 15551234567
-        X-Caller-Name: John Smith
-        X-Called: 15557654321
-        X-Called-Name: Joe Bloggs
-        X-Language: en-US
-        Content-Type: audio/wav
-        Content-Transfer-Encoding: base64
-        
-        UklGRqxhAABXQVZFZm10IBAAAAAHAAEAQB8AAEAfAAABAAgAZGF0YYBhAAD9
-        &lt;snip&gt;
-        yIS9kQ8qsgg9gAhkmAwN0ApI4YvqmBDd1Yvr+IzwGIdyOId0Wid2eId4mId6               
-</code>
+### Request template
 
-<p>You decide that the <tt>From</tt>, <tt>To</tt>, and <tt>Message-Id</tt> headers are mandatory.</p>
+The request template defines what to keep from the original incoming request, along with additional metadata and configurations.
 
-<p>For the response, you decide the <tt>Message-Id</tt> header is mandatory to include, and the maximum transcription length is 3000 characters (approximately 600 words).</p>
+Here is an example `request.j2` template for an SMTP deployment:
 
-<h2>Create a profile and templates</h2>
-
-<p>The next step is to build the profile and templates based on the requirements you've gathered.</p>
-
-<p>The templates are Jinja templates. To learn more about working with Jinja templates, go to <a href="https://jinja.palletsprojects.com/en/3.1.x/templates/">the Jinja documentation</a>. In V2TIC, these templates use the <tt>.j2</tt> extension. You must have at least <tt>request.j2</tt> and <tt>response.j2</tt> templates, which handle converting requests and responses, but you could have more depending on your needs.</p>
-
-<p>Each deployment's profile and templates exist in a folder inside <tt>etc/profiles</tt>, with the templates in their own folder, like the samples included with the V2TIC project.</p>
-
-<h3>Request template</h3>
-
-<p>The request template defines what to keep from the original incoming request, along with additional metadata and configurations.</p>
-
-<p>Here is an example <tt>request.j2</tt> template for an SMTP deployment:</p>
-
-<code>
+```
     {
         "profile": "sample-smtp",
         "scrid": "{{request.scrid}}",
@@ -101,25 +82,22 @@
         "log_transcriptions_enabled": "False"
       }
     }
-</code>
+```
 
-<p>These are the key parts of the template:</p>
+These are the key parts of the template:
+- `profile`: Required. Refers to the profile used by this deployment.
+- `scrid`: The unique ID for this transcription, generated by V2TIC.
+- `pass_through_data`: Contains key-pairs to be passed through into the response (in this example, the `From`, `To`, and `Message-Id` headers in the original request).
+- `metadata`: Contains key-pairs for metadata of the profile.
+- `acs_client`: Contains key-pair values for Azure AI configuration.
 
-<ul>
-    <li><tt>profile</tt>: Required. Refers to the profile used by this deployment.</li>
-    <li><tt>scrid</tt>: The unique ID for this transcription, generated by V2TIC.</li>
-    <li><tt>pass_through_data”</tt>: Contains key-pairs to be passed through into the response (in this example, the <tt>From</tt>, <tt>To</tt>, and <tt>Message-Id</tt> headers in the original request).</li>
-    <li><tt>metadata</tt>: Contains key-pairs for metadata of the profile.</li>
-    <li><tt>acs_client</tt>: Contains key-pair values for Azure AI configuration.</li>
-</ul>
+### Response template
 
-<h3>Response template</h3>
+The response template defines what content and in what order that content appears in the final response V2TIC sends out.
 
-<p>The response template defines what content and in what order that content appears in the final response V2TIC sends out.</p>
+Here is an example `response.j2` template for an HTTPS deployment:
 
-<p>Here is an example <tt>response.j2</tt> template for an HTTPS deployment:</p>
-
-<code>
+```
     {
         "return_url": "{{request.headers['X-Return-Url']}}",
         "verify_ssl": "false",
@@ -139,21 +117,17 @@
            "encoding": "utf-8"
         }
      } 
-     
-</code>
+```
 
-<p>These are the key parts of the template:</p>
+These are the key parts of the template:
+- `return_url`: The URL where the final response is sent to. From the passthrough data.
+- `headers`: Contains key-pair headers for the response.
+- `body`: Defines the actual message in the response.
+- `encoding`: Defines the encoding format. For example, utf-8, iso-8859-1, ascii, and more.
 
-<ul>
-    <li><tt>return_url</tt>: The URL where the final response is sent to. From the passthrough data.</li>
-    <li><tt>headers</tt>: Contains key-pair headers for the response.</li>
-    <li><tt>body</tt>: Defines the actual message in the response.</li>
-    <li><tt>encoding</tt>: Defines the encoding format. For example, utf-8, iso-8859-1, ascii, and more.</li>
-</ul>
+Here is an example `response.j2` template for an SMTP deployment:
 
-<p>Here is an example <tt>response.j2</tt> template for an SMTP deployment:</p>
-
-<code>
+```
     {
         {# optionally put response_address or will default to configured smtp.response_host:smtp.reponse_port
         "response_address": "192.168.1.4:9025",
@@ -177,23 +151,20 @@
            "encoding": "utf-8"
         }
      }
-</code>
+```
 
-<p>These are the key parts of the template:</p>
+These are the key parts of the template:
+- `mail_from`: An SMTP command.
+- `rcpt_to`: An SMTP command.
+- `headers`: Contains key-pair headers for the response.
+- `body`: Defines the actual message in the response.
+- `encoding`: Defines the encoding format. For example, utf-8, iso-8859-1, ascii, and more.
 
-<ul>
-    <li><tt>mail_from</tt>: An SMTP command.</li>
-    <li><tt>rcpt_to</tt>: An SMTP command.</li>
-    <li><tt>headers</tt>: Contains key-pair headers for the response.</li>
-    <li><tt>body</tt>: Defines the actual message in the response.</li>
-    <li><tt>encoding</tt>: Defines the encoding format. For example, utf-8, iso-8859-1, ascii, and more.</li>
-</ul>
+These examples use an additional template, `response-body.j2`, which defines the format of what the ultimate end user of the transcription will see.
 
-<p>These examples use an additional template, <tt>response-body.j2</tt>, which defines the format of what the ultimate end user of the transcription will see.</p>
+Here is an example `response-body.j2` template for an SMTP deployment:
 
-<p>Here is an example <tt>response-body.j2</tt> template for an SMTP deployment:</p>
-
-<code>
+```
 {{request.recognition_result.text}}
 
 ------------------------------------------
@@ -220,19 +191,20 @@ requested_languages: {{request.recognition_result.requested_languages}}
 lid_enabled: true
 detected_languages: {{request.recognition_result.detected_languages}}
 {%- endif %}
-</code>
+```
 
-<p><b>Note:</b> This example mentions <tt>itn_text</tt>, which is Inverse Text Normalization. Go to the <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/display-text-format?pivots=programming-language-python">Azure AI</a> documentation to learn more.</p>
+> [!NOTE]
+> This example mentions `itn_text`, which is Inverse Text Normalization. Go to the [Azure AI](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/display-text-format?pivots=programming-language-python) documentation to learn more.
 
-<h3>Profile</h3>
+### Profile
 
-<p><tt>profile.py</tt> defines a class for handling SMTP- or HTTPS-related operations. These include obtaining mandatory headers and how to handle responses based on the success or failure of transcription.</p>
+`profile.py` defines a class for handling SMTP- or HTTPS-related operations. These include obtaining mandatory headers and how to handle responses based on the success or failure of transcription.
 
-<p>The profile imports fields, headers, and constants from <tt>v2ticlib</tt>. It also imports the global profile class from <tt>AbstractProfile</tt> in the <tt>Common</tt> folder.</p>
+The profile imports fields, headers, and constants from `v2ticlib`. It also imports the global profile class from `AbstractProfile` in the `Common` folder.
 
-<p>Here is an example <tt>profile.py</tt> template for an SMTP deployment:</p>
+Here is an example `profile.py` template for an SMTP deployment:
 
-<code>
+```
     import typing
 import v2ticlib.constants.fields as Fields
 import v2ticlib.constants.headers as Headers
@@ -254,19 +226,18 @@ class SampleSmtpProfile(AbstractProfile):
             response[Fields.HEADERS][Headers.X_DETECTED_LANGUAGE_CONSTELLATION] = recognition_result[Fields.DETECTED_LANGUAGES]
 
         return response
-</code>
+```
 
-<p>This profile also declares the maximum character length for the transcription from the Gather Requirements step: <code>context[Fields.MAX_CONVERSION_LENGTH] = 3000</code>. This profile class also has a unique name.</p>
+This profile also declares the maximum character length for the transcription from the Gather Requirements step: <code>context[Fields.MAX_CONVERSION_LENGTH] = 3000</code>. This profile class also has a unique name.
 
-<h2>Create configuration and deployment files</h2>
+## Create configuration and deployment files
 
-<p>After creating the profile and templates, you can create the <tt>configmap-file.yaml</tt> and <tt>deployment.yaml</tt> files. These files define and configure the V2TIC image you'll build for your deployment.</p>
+After creating the profile and templates, you can create the `configmap-file.yaml` and `deployment.yaml` files. These files define and configure the V2TIC image you'll build for your deployment.
 
-<p>These files have fixed formats and must be in a folder under <tt>etc/deployments</tt>. When creating your own, use the samples provided in the project. Only change the values of the key-pairs. Go to <a href="/docs/reference/deploy-configurations-templates.html">Configuration fields</a> to learn about creating <tt>configmap-file.yaml</tt> files.</p>
+These files have fixed formats and must be in a folder under `etc/deployments`. When creating your own, use the samples provided in the project. Only change the values of the key-pairs. Go to [Configuration fields](../reference/deploy-configurations-templates.md) to learn about creating `configmap-file.yaml` files.
 
-<h2>What's next</h2>
+## What's next
 
-<p>Once you've created your profile, template, configuration, and deployment files, you can <a href="/docs/build-deploy/build-summary.html">build and deploy</a> your V2TIC deployment.</p>
+Once you've created your profile, template, configuration, and deployment files, you can [build and deploy](../build-deploy/build-summary.md) your V2TIC deployment.
 
-<p><a href="/docs/index.html">Return to table of contents</a></p>
-</body></html>
+[Return to table of contents](../index.md)

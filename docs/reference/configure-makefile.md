@@ -1,29 +1,17 @@
+# Makefile information
 
-<!DOCTYPE html>
+The Makefile contains is a text file to automate build and execution tasks such as building Docker image(s), loading image(s) to minikube, deploying image(s) and running services on pods. When you run `make` commands, like when [building and deploying V2TIC images](../build-deploy/build-summary.md), you are using the Makefile.
 
-<html>
+In order to build and deploy V2TIC images, you must enter your Azure AI speech key and endpoint in the Makefile:
 
-<head>
+```
+SPEECH_KEY :=
+    END_POINT :=
+```
 
-  <link rel="stylesheet" href="/docs/styles.css">
+## Makefile example
 
-</head>
-
-
-<body>
-
-<h1>Makefile information</h1>
-
-<p>The Makefile contains is a text file to automate build and execution tasks such as building Docker image(s), loading image(s) to minikube, deploying image(s) and running services on pods. When you run <tt>make</tt> commands, like when <a href="/docs/build-deploy/build-summary.html">building and deploying V2TIC images</a>, you are using the Makefile.</p>
-
-<p>In order to build and deploy V2TIC images, you must enter your Azure AI speech key and endpoint in the Makefile:</p>
-
-<code>SPEECH_KEY :=
-    END_POINT :=</code>
-
-<h2>Makefile example</h2>
-
-<code>
+```
 # By declaring targets as .PHONY, we ensure that the associated commands are always executed, regardless of the existence of files or directories with the same names as the targets.
 
 .PHONY: default_make build_image check_minikube_status start_minikube load_image deploy_pod start_dashboard get_status destroy_pod enable_autoscale destroy_autoscale ssh_pod clean
@@ -133,7 +121,6 @@ destroy_autoscale:
 
 ssh_pod:
 	kubectl exec -it <pod_name> -- /bin/bash 
-</code>
+```
 
-    <p><a href="/docs/index.html">Return to table of contents</a></p>
-</body></html>
+[Return to table of contents](../index.md)

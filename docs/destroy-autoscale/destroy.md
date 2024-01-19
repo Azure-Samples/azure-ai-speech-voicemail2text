@@ -1,26 +1,11 @@
-<!DOCTYPE html>
+# Destroy deployments
 
-<html>
+You can destroy V2TIC deployments if you need to make configuration changes or a pod needs to be deleted. Destroying a deployment deletes the deployment, service, and configmap for that deployment.
 
-<head>
+To a destroy a deployment, in your project, run this command, where `test_deployment` is the name of your deployment:
 
-  <link rel="stylesheet" href="/docs/styles.css">
+```bash
+make destroy_pod deployment=test_deployment
+```
 
-</head>
-
-
-<body>
-
-<h1>Destroy deployments</h1>
-
-<p>You can destroy V2TIC deployments if you need to make configurartion changes or a pod needs to be deleted. Destroying a deployment deletes the deployment, service, and configmap for that deployment.</p>
-
-<p>
-    To a destroy a deployment, in your project, run this command, where <tt>test_deployment</tt> is the name of your deployment:
-    <br><br>
-    <code>make destroy_pod deployment=test_deployment</code>
-</p>
-
-
-<p><a href="/docs/index.html">Return to table of contents</a></p>
-</body></html>
+[Return to table of contents](../index.md)

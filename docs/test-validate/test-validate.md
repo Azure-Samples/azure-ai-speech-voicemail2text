@@ -1,212 +1,141 @@
-<!DOCTYPE html>
+# Test and validate
 
-<html>
+After building and deploying the image, you can test and validate it.
 
-<head>
+## Set SSH Tunneling Port Forwarding
 
-  <link rel="stylesheet" href="/docs/styles.css">
+Port forwarding is required for facilitating the connections from localhost to the pod of the minikube in which the services are running during your tests.
 
-</head>
-
-
-<body>
-
-<h1>Test and validate</h1>
-
-<p>After building and deploying the image, you can test and validate it.</p>
-
-<h2>Set SSH Tunneling Port Forwarding</h2>
-
-<p>Port forwarding is required for facilitating the connections from localhost to the pod of the minikube in which the services are running during your tests.</p>
-
-<p>
-    To set up the port number of your service deployment:
+To set up the port number of your service deployment:
     
-    <ol>
-        <li>Open the configmap-file.yaml for your service deployment, either <tt>../etc/deployments/https/configmap-file.yaml</tt> or <tt>../etc/deployments/smtp/configmap-file.yaml</tt>.</li>
-        <li>Look for the port number on the <code>v2tic_nodeport</code> line. For example:
-            <br><br>
-            <code>v2tic_nodeport= "31000"</code>
-        </li>
-        <li>Create the port forwarding connections by establishing SSH to minikube, and ensure the SSH tunneling sessions are always intact and live.
-            <br><br>
-            In a new screen, run this command, where <tt>31000</tt> and <tt>32000</tt> are the port numbers for your service deployments:
-            <br><br>
-            <code>ssh -i ~/.minikube/machines/minikube/id_rsa docker@$(minikube ip) -L \*:31000:0.0.0.0:31000 -L \*:32000:0.0.0.0:32000</code>
-            <br><br>You can close the screen after. 
-        </li>
-    </ol>
-</p>
+- Open the configmap-file.yaml for your service deployment, either `../etc/deployments/https/configmap-file.yaml` or `../etc/deployments/smtp/configmap-file.yaml`.
+- Look for the port number on the `v2tic_nodeport` line. For example: `v2tic_nodeport= "31000"`
+- Create the port forwarding connections by establishing SSH to minikube, and ensure the SSH tunneling sessions are always intact and live.
+    - In a new screen, run this command, where `31000` and `32000` are the port numbers for your service deployments: `ssh -i ~/.minikube/machines/minikube/id_rsa docker@$(minikube ip) -L \*:31000:0.0.0.0:31000 -L \*:32000:0.0.0.0:32000`
+You can close the screen after. 
 
-<h2>Start listeners for capturing responses</h2>
+## Start listeners for capturing responses
 
-<p>V2TIC has listeners for capturing responses in order to see and test those responses. Listener files are found in <tt>sample-server-listeners</tt>.</p>
+V2TIC has listeners for capturing responses in order to see and test those responses. Listener files are found in `sample-server-listeners`.
 
-<p>In order to send responses to listeners, you need to change the destination in your V2TIC deployment configuration to the listener port. Once you've finished testing, you must change them back to the real destination values.</p>
+In order to send responses to listeners, you need to change the destination in your V2TIC deployment configuration to the listener port. Once you've finished testing, you must change them back to the real destination values.
 
 (what and how to change those values)
 
-<p>To start the listener script for each deployment:</p>
+To start the listener script for each deployment:
 
-<h3>HTTPS</h3>
+### HTTPS
 
-<p>
-    In a new terminal, run this command in the V2TIC project folder:
-    <code>ent-v2t-azure$ /usr/bin/python3.9 sample_server_listeners/sample_http_server.py
-    </code>
-    You should see in response, where the IP address is the address for your V2TIC server:
-    <code>HTTP Server listening for responses on http://10.33.135.37:8443/response
-    </code>
-    Responses will appear in this terminal.
-</p>
+In a new terminal, run this command in the V2TIC project folder:
 
-<h3>SMTP</h3>
+```
+ent-v2t-azure$ /usr/bin/python3.9 sample_server_listeners/sample_http_server.py
+```
 
-<p>
-    In a new terminal. run this command in the V2TIC project folder:
-    <code>/ent-v2t-azure$ /usr/bin/python3.9 sample_server_listeners/sample_smtp_server.py
-    </code>
-    You should see in response, where the IP address is the address for your V2TIC server:
-    <code>SMTP Server Listening On 10.33.135.37:9025
-    </code>
-    Responses will appear in this terminal.
-</p>
+You should see in response, where the IP address is the address for your V2TIC server:
 
+```
+HTTP Server listening for responses on http://10.33.135.37:8443/response
+```
 
-<h2>Test your services</h2>
+Responses will appear in this terminal.
 
-<p>You can run local and remote tests to verify your builds and port forwarding are working. You'll need the sample audio file found at <tt>../etc/audio/sample-audio.txt</tt> to run these tests.</p>
+### SMTP
 
-<h3>Test your HTTPS service</h3>
+In a new terminal. run this command in the V2TIC project folder:
 
-<h4>Local</h4>
+```
+/ent-v2t-azure$ /usr/bin/python3.9 sample_server_listeners/sample_smtp_server.py
+```
 
-<p>
-    <ol>
-        <li>In your project, either run the test script located at <tt>sample_clients/sample_https_client.py</tt> to request a transcription, or use the curl command below. In this command, <tt>31000</tt> is your service deployment's port number and <tt>10.33.135.37:8443</tt> is the IP address and port for the listener:
-            <br><br>
-            <code>curl -X PUT -vN https://127.0.0.1:31000/transcribe  -k -H "X-Reference: testing-http-push" -H "Connection: close" -H "Content-Type: audio/wav" -H "X-Language: en-US" -H "X-Return-URL:  http://10.33.135.37:8443/response" -H "Content-Transfer-Encoding: base64" -H "X-Caller: 1234567890" -d @etc/audio/sample-audio.txt</code>
-        </li>
-        <li>In the listener terminal, check the response for a <tt>conversionResponse</tt> message. The <tt>Location</tt> value matches the request ID (<tt>scrid</tt>).</li>
-        <li>You can also check for transcription response on the service container logs with a kubectl command or the Kubernetes Dashboard:
-            <ul>
-                <li>kubectl:
-                    <ol>
-                        <li>In your project, run <tt>kubectl get pod</tt> to display the pod's information. The pod's name, redy status, status, restarts, and age appears.</li>
-                        <li>Run <code>kubectl logs</code> with the pod's name to display the logs. For example:
-                        <br><br>
-                        <code>kubectl logs test_pod</code></li>
-                    </ol></li>
-                <li>Kubernetes Dashboard:
-                    <ul>
-                        <li>Follow the Kubernetes Dashboard instructions <a href="/docs/build-deploy/build-summary.html#kubernetes-dashboard">verify build instructions</a> to view the transcription response logs.</li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-    </ol>
-</p>
+You should see in response, where the IP address is the address for your V2TIC server:
 
-<h4>Remote</h4>
+```
+SMTP Server Listening On 10.33.135.37:9025
+```
 
-<p>
-    <ol>
-        <li>Copy <tt>sample-audio.txt</tt> to another host and make sure it's accessible.</li>
-        <li>In your project, run this command, where <tt>31000</tt> is your service deployment's port number and <tt>http://10.33.135.37:8443</tt> is the secure V2TIC address, which is the same address as the listener, and the port configured for the listener:
-            <br><br>
-            <code>curl -X PUT -vN https://<Docker_IP>:31000/transcribe  -k -H "X-Reference: testing-http-push" -H "Connection: close" -H "Content-Type: audio/wav" -H "X-Language: en-US" -H "X-Return-URL: http://10.33.135.37:8443/response" -H "Content-Transfer-Encoding: base64" -H "X-Caller: 1234567890" -d @audio/sample-audio.txt </code>
-        </li>
-        <li>In the listener terminal, check the response for a <tt>conversionResponse</tt> message. The <tt>Location</tt> value matches the request ID (<tt>scrid</tt>).</li>
-        <li>Check for transcription response on the service container logs with a kubectl command or the Kubernetes Dashboard:
-            <ul>
-                <li>kubectl:
-                    <ol>
-                        <li>In your project, run <tt>kubectl get pod</tt> to display the pod's information. The pod's name, redy status, status, restarts, and age appears.</li>
-                        <li>Run <code>kubectl logs</code> with the pod's name to display the logs. For example:
-                        <br><br>
-                        <code>kubectl logs test_pod</code></li>
-                    </ol></li>
-                <li>Kubernetes Dashboard:
-                    <ul>
-                        <li>Follow the Kubernetes Dashboard instructions <a href="/docs/build-deploy/build-summary.html#kubernetes-dashboard">verify build instructions</a> to view the transcription response logs.</li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-    </ol>
-</p>
+Responses will appear in this terminal.
 
-<h3>Test your SMTP service</h3>
+## Test your services
 
-<h4>Local</h4>
+You can run local and remote tests to verify your builds and port forwarding are working. You'll need the sample audio file found at `../etc/audio/sample-audio.txt`` to run these tests.
 
-<p>
-    <ol>
-        <li>From your localhost, run <tt>sample_smtp_client.py</tt> found at <tt>/sample_smtp_clients/sample_smtp_client.py</tt>.</li>
-        <li>In the listener terminal, check the response for a <tt>conversionResponse</tt> message. The <tt>Location</tt> value matches the request ID (<tt>scrid</tt>).</li>
-        <li>Check for transcription response on the service container logs with a kubectl command or the Kubernetes Dashboard:
-            <ul>
-                <li>kubectl:
-                    <ol>
-                        <li>In your project, run <tt>kubectl get pod</tt> to display the pod's information. The pod's name, redy status, status, restarts, and age appears.</li>
-                        <li>Run <code>kubectl logs</code> with the pod's name to display the logs. For example:
-                        <br><br>
-                        <code>kubectl logs test_pod</code></li>
-                    </ol></li>
-                <li>Kubernetes Dashboard:
-                    <ul>
-                        <li>Follow the Kubernetes Dashboard instructions <a href="/docs/build-deploy/build-summary.html#kubernetes-dashboard">verify build instructions</a> to view the transcription response logs.</li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-    </ol>
-</p>
+### Test your HTTPS service
 
-<h4>Remote</h4>
+#### Local
 
-<p><b>Note:</b> Requires the aiosmptlib library in addition to Python3.</p>
+- In your project, either run the test script located at `sample_clients/sample_https_client.py` to request a transcription, or use the curl command below. In this command,`31000` is your service deployment's port number and `10.33.135.37:8443` is the IP address and port for the listener:
 
-<p>
-    <ol>
-        <li>Copy <tt>sample_smtp_client.py</tt> found at <tt>/sample_smtp_clients/sample_smtp_client.py</tt> to another host.</li>
-        <li>In <tt>sample_smtp_client.py</tt>, edit the <tt>smtp_server</tt> to the address of <tt>smtp_server</tt> in your V2TIC deployment.</li>
-        <li>Run <tt>sample_smtp_client.py</tt> on your other host using this command:
-        <br><br>
-        <code>/usr/bin/python3 sample_smtp_clients/sample_smtp_client.py</code></li>
-        <li>Check for transcription response on the service container logs with a kubectl command or the Kubernetes Dashboard:
-            <ul>
-                <li>kubectl:
-                    <ol>
-                        <li>In your project, run <tt>kubectl get pod</tt> to display the pod's information. The pod's name, redy status, status, restarts, and age appears.</li>
-                        <li>Run <code>kubectl logs</code> with the pod's name to display the logs. For example:
-                        <br><br>
-                        <code>kubectl logs test_pod</code></li>
-                    </ol></li>
-                <li>Kubernetes Dashboard:
-                    <ul>
-                        <li>Follow the Kubernetes Dashboard instructions <a href="/docs/build-deploy/build-summary.html#kubernetes-dashboard">verify build instructions</a> to view the transcription response logs.</li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-    </ol>
-</p>
+```
+curl -X PUT -vN https://127.0.0.1:31000/transcribe  -k -H "X-Reference: testing-http-push" -H "Connection: close" -H "Content-Type: audio/wav" -H "X-Language: en-US" -H "X-Return-URL:  http://10.33.135.37:8443/response" -H "Content-Transfer-Encoding: base64" -H "X-Caller: 1234567890" -d @etc/audio/sample-audio.txt
+```
+- In the listener terminal, check the response for a `conversionResponse` message. The `Location` value matches the request ID (`scrid`).
+- You can also check for transcription response on the service container logs with a kubectl command or the Kubernetes Dashboard:
+    - kubectl:
+        - In your project, run `kubectl get pod` to display the pod's information. The pod's name, ready status, status, restarts, and age appears.
+        - Run `kubectl logs` with the pod's name to display the logs. For example: `kubectl logs test_pod`
+    - Kubernetes Dashboard:
+        - Follow the Kubernetes Dashboard instructions [verify build instructions](../build-deploy/build-summary.md#kubernetes-dashboard) to view the transcription response logs.
 
-<h2>Check and debug deployments</h2>
+#### Remote
 
-<p>To check the status of a deployment, run <tt>kubectly get all</tt> in the V2TIC project to list the status of the cluster. The first section lists the pod names and their status:</p>
+- Copy `sample-audio.txt` to another host and make sure it's accessible.
+- In your project, run this command, where `31000` is your service deployment's port number and `http://10.33.135.37:8443` is the secure V2TIC address, which is the same address as the listener, and the port configured for the listener:
 
-<code>
+```
+curl -X PUT -vN https://<Docker_IP>:31000/transcribe  -k -H "X-Reference: testing-http-push" -H "Connection: close" -H "Content-Type: audio/wav" -H "X-Language: en-US" -H "X-Return-URL: http://10.33.135.37:8443/response" -H "Content-Transfer-Encoding: base64" -H "X-Caller: 1234567890" -d @audio/sample-audio.txt
+```
+
+- In the listener terminal, check the response for a `conversionResponse` message. The `Location` value matches the request ID (`scrid`).
+- Check for transcription response on the service container logs with a kubectl command or the Kubernetes Dashboard:
+    - kubectl:
+        - In your project, run `kubectl get pod` to display the pod's information. The pod's name, redy status, status, restarts, and age appears.
+        - Run `kubectl logs` with the pod's name to display the logs. For example: `kubectl logs test_pod`
+    - Kubernetes Dashboard:
+        - Follow the Kubernetes Dashboard instructions [verify build instructions](../build-deploy/build-summary.md) to view the transcription response logs.
+
+### Test your SMTP service
+
+#### Local
+
+- From your localhost, run `sample_smtp_client.py` found at `/sample_smtp_clients/sample_smtp_client.py`.
+- In the listener terminal, check the response for a `conversionResponse` message. The `Location` value matches the request ID (`scrid`).
+- Check for transcription response on the service container logs with a kubectl command or the Kubernetes Dashboard:
+    - kubectl:
+        - In your project, run `kubectl get pod` to display the pod's information. The pod's name, ready status, status, restarts, and age appears.
+        - Run `kubectl logs` with the pod's name to display the logs. For example: `kubectl logs test_pod`
+    - Kubernetes Dashboard:
+        - Follow the Kubernetes Dashboard instructions [verify build instructions](../build-deploy/build-summary.md) to view the transcription response logs.
+
+#### Remote
+
+> [!NOTE]
+> Requires the aiosmptlib library in addition to Python3.
+
+- Copy `sample_smtp_client.py` found at `/sample_smtp_clients/sample_smtp_client.py` to another host.
+- In `sample_smtp_client.py`, edit the `smtp_server` to the address of `smtp_server` in your V2TIC deployment.
+- Run `sample_smtp_client.py` on your other host using this command: `/usr/bin/python3 sample_smtp_clients/sample_smtp_client.py`
+- Check for transcription response on the service container logs with a kubectl command or the Kubernetes Dashboard:
+    - kubectl:
+        - In your project, run `kubectl get pod` to display the pod's information. The pod's name, ready status, status, restarts, and age appears.
+        - Run `kubectl logs` with the pod's name to display the logs. For example: `kubectl logs test_pod`
+    - Kubernetes Dashboard:
+        - Follow the Kubernetes Dashboard instructions [verify build instructions](../build-deploy/build-summary.md) to view the transcription response logs.
+
+## Check and debug deployments
+
+To check the status of a deployment, run `kubectly get all` in the V2TIC project to list the status of the cluster. The first section lists the pod names and their status:
+
+```
     /ent-v2t-azure# kubectl get all
     NAME                                    READY   STATUS             RESTARTS      AGE
     pod/https-deployment-7468cf8b6b-zvstl   1/1     Running            1 (20h ago)   20h
     pod/smtp-deployment-8c74fb5c6-9lgd8     0/1     CrashLoopBackOff   2 (19s ago)   35s
-</code>
+```
 
 <p>To see the logs for a specific pod, run <tt>kubectl logs &lt;pod/service-deployment&gt;</pod></tt>:</p>
 
-<code>
+```
     ent-v2t-azure# kubectl logs -f pod/smtp-deployment-8c74fb5c6-9lgd8
 Traceback (most recent call last):
   File "/app/servers/smtp_server.py", line 9, in &lt;module&gt;
@@ -232,8 +161,6 @@ Traceback (most recent call last):
   File "/app/etc/profiles/sample_smtp/templates/response_body.j2", line 12, in template
     converted_text: {{This person called and left you a message. Please call voicemail - Nuance}}
 jinja2.exceptions.TemplateSyntaxError: expected token 'end of print statement', got 'person '
-</code>
+```
 
-
-<p><a href="/docs/index.html">Return to table of contents</a></p>
-</body></html>
+[Return to table of contents](../index.md)
