@@ -133,7 +133,7 @@ To check the status of a deployment, run `kubectly get all` in the V2TIC project
     pod/smtp-deployment-8c74fb5c6-9lgd8     0/1     CrashLoopBackOff   2 (19s ago)   35s
 ```
 
-<p>To see the logs for a specific pod, run <tt>kubectl logs &lt;pod/service-deployment&gt;</pod></tt>:</p>
+To see the logs for a specific pod, run `kubectl logs <pod/service-deployment>`
 
 ```
     ent-v2t-azure# kubectl logs -f pod/smtp-deployment-8c74fb5c6-9lgd8
