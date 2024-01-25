@@ -112,6 +112,9 @@ Run `make quick_start` to run the end-to-end deployment: building the image from
 ```bash
 make quick_start deployment=<name-of-deployment>
 ```
+## Documentation
+
+This repo contains an [index of documents](/docs/index.md)to help you navigate our documentation more easily.
 
 ## Additional Resources
 • [Docker documentation](https://docs.docker.com/)
