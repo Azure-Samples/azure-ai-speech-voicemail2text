@@ -46,8 +46,12 @@ start_minikube:
 
 load_image:
 	@eval export LOAD_IMAGE_NAME=$(image_name) ;\
-	echo "Image Loading..."; \
-	minikube image load $$LOAD_IMAGE_NAME
+	export tag_name="latest" ;\
+	mkdir -p scratch ;\
+	docker image save -o scratch/image.tar $$LOAD_IMAGE_NAME:$$tag_name ;\
+	echo "Loading image $$LOAD_IMAGE_NAME ..."; \
+	minikube image load scratch/image.tar ;\
+	rm -rf scratch
 
 deploy_pod:
 	@eval export DEPLOYMENT=$(deployment);\
@@ -117,7 +121,8 @@ clean:
     		echo "Deleted configmap-file-instance.yaml"; \
 	else \
 		echo "File etc/deployments/$$DEPLOYMENT/configmap-file-instance.yaml doesn't exist. Skipping deletion."; \
-	fi
+	fi ;\
+	rm -rf scratch
 
 enable_autoscale:
 	@export DEPLOYMENT=$(deployment);\
