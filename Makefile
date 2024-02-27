@@ -70,25 +70,15 @@ deploy_pod:
 	export vmcs_label=$$(kubectl get deployment $$DEPLOYMENT-deployment -o jsonpath='{.metadata.labels.app}') && \
 	kubectl wait --for=condition=ready pod -l app=$$vmcs_label ;\
 	export nodeport=$$(kubectl get configmap $$DEPLOYMENT-configmap-file -o jsonpath='{.data.v2tic_nodeport}') ;\
+	echo "Refer README.md section 'Getting Started #6' to run sanity checks on created pod";\
+	echo node_port: "$$nodeport" ;\
 	if echo "$(OS_NAME)" | grep "Linux"; then\
-		echo "Skipping port-forward on Linux" ;\
-		export pod_ip="$$(kubectl get pod -l app=$$vmcs_label -o jsonpath='{.items[*].status.hostIP}')" && \
+		export pod_ip="$$(kubectl get pod -l app=$$vmcs_label -o jsonpath='{.items[*].status.hostIP}')" ;\
 		echo pod_ip: "$$pod_ip" ;\
-		echo node_port: "$$nodeport" ;\
-		echo For deployment $$DEPLOYMENT send traffic to: "$$pod_ip:$$nodeport" ;\
-		echo "";\
-		echo "To run an https sanity:";\
-		echo "start the sample https listener: python3.9 sample_server_listeners/sample_http_server.py";\
-		echo "add the ip address produced by the listener as a https-listener.v2tic.com entry in /etc/hosts; example: <ip_address> https-listener.v2tic.com";\
-		echo "add the pod ip address of the https deployment in /etc/hosts as a https-server.v2tic.com entry; example: $$pod_ip https-server.v2tic.com";\
-		echo "execute the https client by passing in the deployment nodeport $$nodeport: python3.9 sample_clients/sample_https_client.py --port $$nodeport";\
-		echo "";\
-		echo "To run an smtp sanity:";\
-		echo "start the sample smtp listener: python3.9 sample_server_listeners/sample_smtp_server.py";\
-		echo "add the ip address produced by the listener as a smtp-listener.v2tic.com entry in /etc/hosts; example: <ip_address> smtp-listener.v2tic.com";\
-		echo "add the pod ip address of the smtp deployment in /etc/hosts as a smtp-server.v2tic.com entry; example: $$pod_ip smtp-server.v2tic.com";\
-		echo "execute the smtp client by passing in the deployment nodeport $$nodeport: python3.9 sample_clients/sample_smtp_client.py --port $$nodeport";\
+		echo For deployment $$DEPLOYMENT send traffic to "$$pod_ip:$$nodeport" ;\
+		echo "Skipping port-forward on Linux" ;\
 	else \
+		echo pod_ip: "127.0.0.1" ;\
 		kubectl port-forward service/$$DEPLOYMENT-service $$v2tic_nodeport:$$v2tic_port;\
 	fi
 

@@ -21,7 +21,6 @@ Option 2: **_Client-side_**
   - Open Command Prompt/terminal.
   - Navigate to the location of your **azure-ai-speech-voicemail2text** folder.
   - Run command **pip install -r requirements.txt**.
-- [git](https://git-scm.com/downloads) (for Windows, add the path environment variable C:\Program Files\Git\usr\bin).
 
 ## Usage
 
@@ -45,24 +44,23 @@ Open the project in [Visual Studio Code](https://code.visualstudio.com/download)
 
 ## Getting Started
 
-Run these commands to build, load and deploy a docker image.
+Run these commands to build, load and deploy a docker image. All commands must be run in a Git Bash terminal
 
 1. Run `cd <path_to_project_parent_folder>` where code is checked out.
 ```bash
 cd <path_to_project_parent_folder>
 ```
 
-2. Run `make build_image` to build the Docker image. Provide a value for `<image_name>`, else it will default to `default_image_datetimestamp`.
-```bash
-make build_image image_name=<image-name>
-```
-Make a note of `<image-name>`, displayed on screen once the image is created.
-
-
-3. Run `make start_minikube` to start Minikube. If it is already running, the status will be displayed. Else, the command will start the cluster.
+2. Run `make start_minikube` to start Minikube. If it is already running, the status will be displayed. Else, the command will start the cluster. If you need to ensure a fresh minikube container is created, run `minikube delete` followed by `minikube start` before this command.
 ```bash
 make start_minikube
 ```
+
+3. Run `make build_image` to build the Docker image. Provide a value for `<image_name>`, else it will default to `default_image_datetimestamp`. `<image_name>` must be lowercase.
+```bash
+make build_image image_name=<image-name>
+```
+Make a note of the new `<image-name>`, displayed on screen once the image is created, as a timestamp will always be appended to `<image-name>`.
 
 4. Run `make load_image` to load the Docker image into Minikube.
 ```bash
@@ -76,13 +74,55 @@ make load_image image_name=<customized-image-name>
 make deploy_pod deployment=<name-of-deployment> image_name=<customized-image-name>
 ```
 
+6. Run sanity checks on created pod.
 
-6. Run `make start_dashboard` to open the Kubernetes dashboard.
+> [!IMPORTANT]
+> You **must** have executed steps as part of Prerequisites -> Option 2: **_Client-side_**. This step must also be performed in a new Git Bash terminal
+
+Make a note of `<pod_ip>` and `<node_port>` displayed on screen after execution of make deploy_pod or make quick_start.
+
+a) Start the sample https/smtp listener.
+```bash
+python sample_server_listeners/sample_http_server.py
+```
+or
+```bash
+python sample_server_listeners/sample_smtp_server.py
+```
+Make a note of `<ip_address>` on which listener started listening.
+
+b) Add the noted listener `<ip_address>` as an entry for http or smtp listener server in /etc/hosts file. (for Windows, navigate to C:\Windows\System32\drivers\etc\hosts)
+
+```bash
+<ip_address> https-listener.v2tic.com smtp-listener.v2tic.com
+```
+
+c) Add the `<pod_ip>` address as an entry for http or smtp pod server in /etc/hosts file. (for Windows, navigate to C:\Windows\System32\drivers\etc\hosts)
+
+```bash
+<pod_ip> https-server.v2tic.com smtp-server.v2tic.com
+```
+
+d) Open another terminal and run sample client to send a http or smtp request to the `<pod_ip>` address and `<node_port>`
+
+```bash
+python sample_clients/sample_https_client.py --port <node_port>
+```
+or
+```bash
+python sample_clients/sample_smtp_client.py --port <node_port>
+```
+
+e) Check sample client console output for request successfully sent.
+
+f) Check sample listener console output for request successfully transcribed and received.
+
+### Optional steps
+Run `make start_dashboard` to open the Kubernetes dashboard.
 ```bash
 make start_dashboard
 ```
 
-### Optional steps
 To delete the pod, run `make destroy` to destroy the deployment, service and configMap for the deployment you select. Sample deployment values: `https`, `smtp`.
 ```bash
 make destroy_pod deployment=<name-of-deployment>
