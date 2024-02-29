@@ -17,7 +17,7 @@ When moving to cloud transcription technologies, Voicemail to Text Integration C
   - [Enable or disable autoscale](destroy-autoscale/autoscale.md)
   - [Destroy a deployment](destroy-autoscale/destroy.md)
 - Configure V2TIC
-  - [File descriptions](docs/reference/file-descriptions.md)
+  - [File descriptions](reference/file-descriptions.md)
   - [Configuration fields](reference/deploy-configurations-templates.md)
-  - [Azure AI configurations](docs/configure/configure-azure.md)
-  - [Makefile information](docs/reference/configure-makefile.md)
+  - [Azure AI configurations](configure/configure-azure.md)
+  - [Makefile information](reference/configure-makefile.md)
