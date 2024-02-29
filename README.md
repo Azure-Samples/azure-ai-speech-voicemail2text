@@ -8,6 +8,9 @@ This repository provides a template for setting up the solution accelerator, alo
 ## Overview
 This README file documents the process to create a Voicemail to Text Integration Client (V2TIC) project by building a Docker image, deploying it to Minikube, and exposing it as a service.
 
+## Documentation
+This Readme is designed as a quickstart guide to get you started with the Accelerator quickly. To find more in-depth concepts, visit the [index of documents](/docs/index.md)to help you navigate our documentation more easily.
+
 ## Prerequisites
 Option 1:  **_Server-side_**
   - [Docker](https://docs.docker.com/get-docker/)
@@ -152,9 +155,6 @@ Run `make quick_start` to run the end-to-end deployment: building the image from
 ```bash
 make quick_start deployment=<name-of-deployment>
 ```
-## Documentation
-
-This repo contains an [index of documents](/docs/index.md)to help you navigate our documentation more easily.
 
 ## Additional Resources
 • [Docker documentation](https://docs.docker.com/)
