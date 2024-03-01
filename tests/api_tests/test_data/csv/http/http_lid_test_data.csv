@@ -3,3 +3,4 @@ lid_enabled,lid_mode,language,audio_file,content_encoding,content_type,detected_
 "True","AtStartHighAccuracy","en-US, es-MX, ja-JP",en-US.txt,base64,text/plain,"en-US","True",Success,Transcribed,60,5
 "True","AtStartHighAccuracy","en-US, es-MX, ja-JP",es-MX.txt,base64,text/plain,"es-MX","True",Success,Transcribed,60,5
 "True","AtStartHighAccuracy","en-US, es-MX, ja-JP",ja-JP.txt,base64,text/plain,"ja-JP","True",Success,Transcribed,60,5
+"True","AtStartHighAccuracy","es-MX, ja-JP",en-US.txt,base64,text/plain,"","True",Success,Unconvertible,0,5

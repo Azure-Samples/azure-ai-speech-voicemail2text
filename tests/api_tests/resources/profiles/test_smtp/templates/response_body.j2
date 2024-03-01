@@ -1,0 +1,27 @@
+{
+    "externalRequestID": "{{request.headers['X-Reference']}}",
+    "reasonStatus": "{{request.status}}",
+    {% if request.status == "Success" -%}
+    "recognitionStatus": "{{request.recognition_result.conversion_status}}",
+    "convertedText": "{{request.recognition_result.text}}",
+    "displayText": "{{request.recognition_result.display_text}}",
+    "itnText": "{{request.recognition_result.itn_text}}",
+    "globalConfidenceScore": "{{request.recognition_result.global_confidence_score}}",
+    "rtf": "{{request.recognition_result.rtf}}",
+    "recognitionDuration": "{{request.recognition_result.duration}}",
+    "audioDurationSecs": "{{request.recognition_result.final_audio_length_secs}}",
+    "audioDurationMSecs": "{{request.recognition_result.final_audio_length_msecs}}",
+    "audioTruncated": "{{request.recognition_result.audio_truncated}}",
+    "requestedLanguages": "{{request.recognition_result.requested_languages}}"
+    {% if request.recognition_result.lid_enabled -%}
+    ,"lidEnabled": "True",
+    "detectedLanguages": "{{request.recognition_result.detected_languages}}"
+    {%- endif -%}
+    {% if request.recognition_result.respond_with_audio_enabled -%}
+    ,"audio": "{{request.recognition_result.original_audio}}"
+    {%- endif -%}
+    {%- else -%}
+    "notes": "{{request.notes}}"
+    {%- endif %}
+    ,"scrid": "{{request.scrid}}"
+}

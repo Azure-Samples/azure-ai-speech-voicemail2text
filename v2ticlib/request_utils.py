@@ -164,7 +164,8 @@ def is_log_transcriptions_enabled(request:dict) -> bool:
     return get_field_value_or_default(request, Fields.LOG_TRANSCRIPTIONS_ENABLED, default_func, literal_eval=True)
 
 def is_truncate_lenghty_transcriptions_enabled(request:dict) -> bool:
-    return metadata_utils.is_truncate_lenghty_transcriptions_enabled()
+    default_func = partial(metadata_utils.is_truncate_lenghty_transcriptions_enabled)
+    return get_field_value_or_default(request, Fields.TRUNCATE_LENGTHY_TRANSCRIPTIONS_ENABLED, default_func, literal_eval=True)
 
 def get_acs_client_property(request:dict, field, literal_eval=False):
     acs_client:dict = get_acs_client(request)
@@ -186,3 +187,14 @@ def set_original_audio(request:dict, encoded_audio:str):
 def get_max_transcription_line_length(request:dict) -> int:
     default_func = partial(metadata_utils.get_max_transcription_line_length)
     return get_field_value_or_default(request, Fields.MAX_TRANSCRIPTION_LINE_LENGTH, default_func, literal_eval=True)
+
+def is_conversion_status_timeout(request):
+    recognition_result:dict = request[Fields.RECOGNITION_RESULT]
+    conversion_status = recognition_result.get(Fields.CONVERSION_STATUS)
+    return conversion_status == Constants.TIMEDOUT
+
+def set_speech_resource(request, speech_resource):
+    set_field(request, Fields.SPEECH_RESOURCE, speech_resource)
+
+def get_speech_resource(request):
+    return get_field(request, Fields.SPEECH_RESOURCE)

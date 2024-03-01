@@ -17,11 +17,11 @@
     ,"lidEnabled": "True",
     "detectedLanguages": "{{request.recognition_result.detected_languages}}"
     {%- endif -%}
-    {%- else -%}
-    ,"notes": "{{request.notes}}"
-    {%- endif %}
     {% if request.recognition_result.respond_with_audio_enabled -%}
     ,"audio": "{{request.recognition_result.original_audio}}"
     {%- endif -%}
+    {%- else -%}
+    "notes": "{{request.notes}}"
+    {%- endif %}
     ,"scrid": "{{request.scrid}}"
 }

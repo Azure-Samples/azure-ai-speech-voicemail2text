@@ -17,6 +17,10 @@ def add_response_callback(scrid, callback):
 global responses
 responses = {}
 
+def get_response_or_default(scrid, default=None):
+    global responses
+    return responses.get(scrid, default)
+
 def get_response(scrid):
     global responses
     return responses[scrid]

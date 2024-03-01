@@ -15,17 +15,16 @@ class HTTPListenerServer:
     stop_server_flag = False
 
     def __init__(self):
-        self.cert_dir = get_config_value("certs", "certs_dir")
-        self.listener_certificate = 'etc/certs/listener/certificate.pem'#self.cert_dir + get_config_value("certs", "listener_certificate")
-        self.listener_private_key = 'etc/certs/listener/private_key.pem'#self.cert_dir + get_config_value("certs", "listener_private_key")
-        self.listener_ca_certs = 'etc/certs/client/certificate.pem'#self.cert_dir + get_config_value("certs", "listener_https_ca_certs")
+        self.cert_file = get_config_value("certs", "listener_cert_file")
+        self.key_file = get_config_value("certs", "listener_key_file")
+        self.client_cert_file = get_config_value("certs", "client_cert_file")
 
     def create_ssl_context(self):
         ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_SERVER)
         ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
         ssl_context.verify_mode = ssl.CERT_REQUIRED
-        ssl_context.load_cert_chain(certfile=self.listener_certificate, keyfile=self.listener_private_key)
-        ssl_context.load_verify_locations(cafile=self.listener_ca_certs)
+        ssl_context.load_cert_chain(certfile=self.cert_file, keyfile=self.key_file)
+        ssl_context.load_verify_locations(cafile=self.client_cert_file)
         return ssl_context
 
     def start_listener(self,host,port):

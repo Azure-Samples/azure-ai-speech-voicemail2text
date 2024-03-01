@@ -11,14 +11,13 @@ from api_tests.core.config_utils import get_config_value
 
 
 def create_ssl_context():
-    cert_dir = get_config_value("certs", "certs_dir")
-    client_certificate = 'etc/certs/client/certificate.pem'#cert_dir + get_config_value("certs", "client_certificate")
-    client_private_key = 'etc/certs/client/private_key.pem'#cert_dir + get_config_value("certs", "client_private_key")
-    server_certs = 'etc/certs/certificate.pem'#cert_dir + get_config_value("certs", "listener_smtp_ca_certs")
+    client_cert_file = get_config_value("certs", "client_cert_file")
+    client_key_file = get_config_value("certs", "client_key_file")
+    server_cert_file = get_config_value("certs", "server_cert_file")
     ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
     ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
-    ssl_context.load_cert_chain(certfile=client_certificate, keyfile=client_private_key)
-    ssl_context.load_verify_locations(cafile=server_certs)
+    ssl_context.load_cert_chain(certfile=client_cert_file, keyfile=client_key_file)
+    ssl_context.load_verify_locations(cafile=server_cert_file)
     return ssl_context
 
 
@@ -28,9 +27,9 @@ async def send_email(sender_email:str, receiver_email:str, message):
     ssl_context = create_ssl_context()
     smtp = SMTP(hostname=smtp_server, port=smtp_port, tls_context=ssl_context, start_tls=True)
     await smtp.connect()
-    response = await smtp.send_message(message, sender=sender_email, recipients=receiver_email)
+    request_ack = await smtp.send_message(message, sender=sender_email, recipients=receiver_email)
     await smtp.quit()
 
-    print(f"Acknowledgement after sending mail: {response}")
+    print(f"Acknowledgement after sending mail: {request_ack}")
 
-    return smtp.hostname,smtp.port,response
+    return request_ack

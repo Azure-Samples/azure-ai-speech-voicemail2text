@@ -3,8 +3,10 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
-
-
+import os
+import re
+import shutil
+from api_tests.core.configmap_utils import read_config_map, get_value_from_config_map
 from api_tests.app.system_utils.run_command import RunCommand
 from api_tests.core.reporter import reporter
 from api_tests.core.assert_utils import validate
@@ -60,7 +62,30 @@ class MakeUtils(object):
                  actual=actual_output, message='Validate configmap created', contains=True)
 
         validate('',str(std_err), 'Validate no error is encountered')
+        
+    def validate_configmap(self, deployment='https'):
+        file_path = f'etc/deployments/{deployment}/configmap-file-instance.yaml'
+        config_map_data = read_config_map(file_path)
+        
+        if config_map_data:
+            key_to_find = 'acs_client_speech_key'
+            value = get_value_from_config_map(config_map_data, key_to_find)
+            
+            if value is not None:
+                print(f"The value for key '{key_to_find}' is: {value}")
+            else:
+                print(f"Key '{key_to_find}' not found in the ConfigMap.")
+        else:
+            print("Failed to read ConfigMap file.")
 
+    def deploy_pod_speech_key_url_missing(self,created_image, deployment='https'):
+        std, std_err, return_code = self.rc.popen_with_output(f"make deploy_pod image_name={created_image} deployment={deployment}", '.', 10)
+        actual_output = str(std)
+
+        validate(0, return_code, 'Validate deploy_pod response status code')
+        validate(expected=f'{deployment}\nSPEECH_KEY was not provided, please review Makefile and ensure it\'s value is not empty',
+                 actual=actual_output, message='Validate deployment failed', contains=True)
+                     
     def destroy_pod(self, deployment='https'):
         rc_make_destroy_pod = self.rc.run_with_output(f"make destroy_pod deployment={deployment}", '.')
         return_code = rc_make_destroy_pod.returncode
@@ -107,3 +132,22 @@ class MakeUtils(object):
 
     def kubectl(self):
         rc_kubectl = self.rc.run_with_output(f"kubectl get all")
+        
+    def override_makefile(self, makefile_path, key, new_value):
+        with open(makefile_path, 'r') as file:
+            makefile_content = file.read()
+
+        # Use regular expression to find and replace key-value pairs
+        pattern = re.compile(fr'{re.escape(key)}\s*:=\s*.*')
+        replacement = f'{key} := {new_value}'
+        updated_content = re.sub(pattern, replacement, makefile_content)
+
+        with open(makefile_path, 'w') as file:
+            file.write(updated_content)
+        
+    def restore_makefile(self, makefile_path, backup_path):
+        shutil.copy2(backup_path, makefile_path)
+        os.remove(backup_path)
+        
+    def backup_makefile(self, makefile_path, backup_path):
+        shutil.copy2(makefile_path, backup_path)

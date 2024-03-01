@@ -16,6 +16,8 @@ class SimpleSMTPRequestHandler():
 
     async def handle_DATA(self, server, session, envelope):
         try:
+            email_message: EmailMessage = email.message_from_bytes(envelope.content)
+            headers = dict(email_message.items())
             print("Received message:")
             print(f'From: {envelope.mail_from}')
             print(f'To: {envelope.rcpt_tos}')

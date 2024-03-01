@@ -6,7 +6,7 @@
 
 
 import asyncio
-import sys, os, typing
+import sys, os, typing, traceback
 from aiohttp import web
 from aiohttp.web import Request
 from aiohttp.web import middleware
@@ -49,6 +49,8 @@ async def filter_middleware(request: Request, handler):
         CONTEXT.set(initial_request_content[SCRID])
         return await coroutine_timeout.timeout_after(handler(initial_request_content, request), timeout=consume_request_timeout)
     except Exception as e:
+        stack = traceback.format_exc()
+        log(f'Timed out processing request: {e} - {stack}')
         return web.Response(status=HTTPStatus.GATEWAY_TIMEOUT, text=str(e))
 
 @routes.post("/transcribe")
@@ -60,6 +62,8 @@ async def handler(initial_request_content:dict, external_request: Request):
     try:
         handle_request(initial_request_content, headers, body)
     except Exception as e:
+        stack = traceback.format_exc()
+        log(f'Error processing request: {e} - {stack}')
         return web.Response(status=HTTPStatus.BAD_REQUEST, text=str(e))
 
     headers = {}

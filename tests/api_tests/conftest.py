@@ -8,8 +8,11 @@
 import pytest
 import os
 import datetime
+import sys
+sys.path.append(os.path.join(os.path.abspath(os.curdir)))
 from api_tests.core.file_utils import read_test_data
 from api_tests.core.config_utils import get_config_value
+
 
 # Set the custom environment variable with the timestamp
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -55,39 +58,33 @@ def read_test_data_from_csv(test_type,test_data_file_name):
     test_data_csv = read_test_data(f"{current_dir}{test_data_repo}{test_data_file_name}")
     return test_data_csv
 
+def get_test_data(test_case):
+    protocol = test_case.split("_")[0]
+    test_data_file_name = get_config_value(f'{protocol}test', f'{test_case}_data')
+    test_data_csv = read_test_data_from_csv(protocol, test_data_file_name)
+    return test_data_csv
+
+test_cases = []
+test_cases.append("http_sanity_test")
+test_cases.append("http_languages_test")
+test_cases.append("http_codecs_test")
+test_cases.append("http_large_audio_test")
+test_cases.append("http_lid_test")
+test_cases.append("http_empty_audio_test")
+test_cases.append("http_bad_audio_test")
+test_cases.append("http_original_audio_in_response_test")
+test_cases.append("http_acs_timeout_test")
+test_cases.append("http_transcoding_timeout_test")
+test_cases.append("http_transcription_failure_test")
+test_cases.append("http_lid_language_limit_exceed_test")
+
+test_cases.append("smtp_sanity_test")
+test_cases.append("smtp_languages_test")
+test_cases.append("smtp_empty_audio_test")
+test_cases.append("smtp_after_deposit_ack_test")
 
 def pytest_generate_tests(metafunc):
-    if 'http_sanity_test_data_tc' in metafunc.fixturenames:
-        test_data_file_name = get_config_value('httptest', 'http_sanity_test_data')
-        http_sanity_test_data_csv = read_test_data_from_csv("http",test_data_file_name)
-        metafunc.parametrize('http_sanity_test_data_tc', http_sanity_test_data_csv)
-
-    if 'http_languages_test_data_tc' in metafunc.fixturenames:
-        test_data_file_name = get_config_value('httptest', 'http_languages_test_data')
-        http_languages_test_data_csv = read_test_data_from_csv("http",test_data_file_name)
-        metafunc.parametrize('http_languages_test_data_tc', http_languages_test_data_csv)
-
-    if 'http_codecs_test_data_tc' in metafunc.fixturenames:
-        test_data_file_name = get_config_value('httptest', 'http_codecs_test_data')
-        http_codecs_test_data_tc_csv = read_test_data_from_csv("http",test_data_file_name)
-        metafunc.parametrize('http_codecs_test_data_tc', http_codecs_test_data_tc_csv)
-
-    if 'http_large_audio_test_data_tc' in metafunc.fixturenames:
-        test_data_file_name = get_config_value('httptest', 'http_large_audio_test_data')
-        http_large_audio_test_data_csv = read_test_data_from_csv("http",test_data_file_name)
-        metafunc.parametrize('http_large_audio_test_data_tc', http_large_audio_test_data_csv)
-
-    if 'http_lid_test_data_tc' in metafunc.fixturenames:
-        test_data_file_name = get_config_value('httptest', 'http_lid_test_data')
-        http_lid_test_data_csv = read_test_data_from_csv("http",test_data_file_name)
-        metafunc.parametrize('http_lid_test_data_tc', http_lid_test_data_csv)
-
-    if 'smtp_sanity_test_data_tc' in metafunc.fixturenames:
-        test_data_file_name = get_config_value('smtptest', 'smtp_sanity_test_data')
-        smtp_sanity_test_data_tc_csv = read_test_data_from_csv("smtp",test_data_file_name)
-        metafunc.parametrize('smtp_sanity_test_data_tc', smtp_sanity_test_data_tc_csv)
-
-    if 'smtp_languages_test_data_tc' in metafunc.fixturenames:
-        test_data_file_name = get_config_value('smtptest', 'smtp_languages_test_data')
-        smtp_languages_test_data_tc_csv = read_test_data_from_csv("smtp",test_data_file_name)
-        metafunc.parametrize('smtp_languages_test_data_tc', smtp_languages_test_data_tc_csv)
+    for test_case in test_cases:
+        if test_case in metafunc.fixturenames:
+            test_data = get_test_data(test_case)
+            metafunc.parametrize(test_case, test_data)

@@ -1,0 +1,2 @@
+language,audio_file,sender_email,receiver_email,subject,expected_email_from,expected_email_subject,expected_email_reference,status,recognition_status,confidence_score_min,rtf_max
+en-US,empty_audio.txt,11111111,receiver@example.com,Test Email,replyto@nuance.com,V2TIC Conversion,20230519004356-epsvaibhav-4130-91405,Success,Transcribed,60,5

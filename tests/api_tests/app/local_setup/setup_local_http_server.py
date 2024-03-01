@@ -13,6 +13,7 @@ import threading
 from api_tests.core.reporter import reporter
 from api_tests.core.config_utils import get_config_value
 import api_tests.core.server_status_utils as server_status_utils
+from api_tests.core.env_utils import set_os_env, unset_os_env
 
 # Define a threading event to signal the HTTP server thread to stop
 stop_server_flag = False
@@ -20,10 +21,11 @@ http_server_process = None
 
 def start_http_local_server():
     global http_server_process
-    # Set the http server config in enviornment variable
-    os.environ['profiles_folder'] = get_config_value('httptest', 'http_test_profiles_folder_local')
-    os.environ['profiles_profile'] = get_config_value('httptest', 'http_test_profiles_profile_local')
 
+    # Set the environment variables for http server profiles
+    reporter.report("===start_http_local_server -> Setting up os.environ() for http server profiles fixture====")
+    set_os_env('profiles_folder', get_config_value('httptest', 'http_test_profiles_folder_local'))
+    set_os_env('profiles_profile', get_config_value('httptest', 'http_test_profiles_profile_local'))
     # Start the http server
     http_server_process = subprocess.Popen(["python", "./servers/https_server.py"])
 
@@ -32,9 +34,11 @@ def stop_http_local_server():
     global stop_server_flag
     stop_server_flag = True
 
-    # Reset the environment variables
-    os.unsetenv('profiles_folder')
-    os.unsetenv('profiles_profile')
+    # Reset the environment variables for http server profiles
+    reporter.report("===stop_http_local_server -> Tearing down os.environ() for http server profiles fixture====")
+    unset_os_env('profiles_folder')
+    unset_os_env('profiles_profile')
+
 
 def reset_http_server_thread():
     # Set the stop_event to signal the HTTP server thread to stop

@@ -1,0 +1,2 @@
+language,audio_file,content_encoding,content_type,status,notes
+en-US,bad_audio.txt,base64,text/plain,Failed,"{'transcoder': 'Transcoder Failed!', 'transcriber': 'skipping transcriber ...'}"

@@ -1,0 +1,8 @@
+{
+	"X-ref-num": "{{request.scrid}}",
+	"Message-Id": "{{request.headers['Message-Id']}}",
+	"X-rcv-time": "{{request.headers.Date}}",
+	"X-dsn-snd-time": "{{request.pass_through_data.x_notification_snd_time}}",
+	"Action": "delivered",
+	"X-After_deposit_ack_message": "Your message was successfully delivered to {{request.headers.To}}"
+}
