@@ -5,9 +5,9 @@ name: v2tic application
 
 on:
   pull_request:
-    branches: [ "talnaser-v2tic" ]
+    branches: [ "main" ]
   push:
-    branches: [ "talnaser-v2tic" ]
+    branches: [ "main" ]
 
 permissions:
   contents: read
