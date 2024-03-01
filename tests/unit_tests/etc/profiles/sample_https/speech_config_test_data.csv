@@ -1,0 +1,7 @@
+lid_enabled,lid_mode,profanity_option,tagging_enabled,tagging_value
+True,AtStartHighAccuracy,Masked,True,TagValue1
+False,AtStartHighAccuracy,Masked,True,TagValue2
+True,Continuous,Masked,True,TagValue1
+False,Continous,Masked,True,TagValue2
+True,AtStartHighAccuracy,Raw,True,TagValue1
+True,AtStartHighAccuracy,Raw,False,TagValue1

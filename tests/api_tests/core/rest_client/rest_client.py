@@ -16,13 +16,9 @@ class RestClient:
         :param body: Set request body
         """
         self.base_url = base_url
-        self.cert_dir = get_config_value("certs", "certs_dir")
-        #self.client_certificate = 'etc/certs/client/certificate.pem'#self.cert_dir + get_config_value("certs", "client_certificate")
-        #self.client_private_key = 'etc/certs/client/private_key.pem'#self.cert_dir + get_config_value("certs", "client_private_key")
-        #self.verify_server_certificate = 'etc/certs/certificate.pem'#self.cert_dir + get_config_value("certs", "verify_server_certificate")
-        self.client_certificate = 'etc/certs/client/certificate.pem'#cert_dir + get_config_value("certs", "client_certificate")
-        self.client_private_key = 'etc/certs/client/private_key.pem'#cert_dir + get_config_value("certs", "client_private_key")
-        self.server_certs = 'etc/certs/certificate.pem'#cert_dir + get_config_value("certs", "listener_smtp_ca_certs")
+        self.client_cert_file = get_config_value("certs", "client_cert_file")
+        self.client_key_file = get_config_value("certs", "client_key_file")
+        self.server_cert_file = get_config_value("certs", "server_cert_file")
 
     def post(self, service_endpoint, headers, body):
         """
@@ -37,9 +33,8 @@ class RestClient:
         reporter.report("Request URL",complete_url)
         reporter.report("Request Header",headers)
 
-
-        response = requests.post(url=complete_url, headers=headers, data=body, cert=(self.client_certificate, self.client_private_key), verify=False)#verify=self.server_certs)
-
+        # to use self signed cert on windows, the server cert (certs.server_cert_file) needs to be added to the trusted root store
+        response = requests.post(url=complete_url, headers=headers, data=body, cert=(self.client_cert_file, self.client_key_file), verify=False)#verify=self.server_certs)
 
         reporter.report("***Response after sending POST request***")
         reporter.report("Response Status Code",response.status_code)

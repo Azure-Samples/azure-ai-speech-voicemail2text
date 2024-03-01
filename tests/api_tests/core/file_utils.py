@@ -8,45 +8,21 @@
 from api_tests.core.config_utils import get_config_value
 import csv
 import os
-import base64
-import textwrap
 from api_tests.core.reporter import reporter
+import v2ticlib.audio_utils as audio_utils
 
-def read_text_from_file(file_path):
+def read_from_file(file_path) -> bytes:
     with open(file_path, 'rb') as file:
-        audio_bytes = base64.decodebytes(file.read())
-    return str(base64.encodebytes(audio_bytes), 'ascii')
-def file_to_base64(file_path):
-    with open(file_path, "rb") as file:
-        return str(base64.encodebytes(file.read()), 'ascii')
+        return file.read()
 
-def get_audio_text(audio_file_dir,audio_file_name):
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    test_data_dir = os.path.join(current_dir, '..')
-    audio_path = test_data_dir + get_config_value('common', 'audio_files_repo') + audio_file_dir + audio_file_name
-    file_type = audio_file_name.split(".")[-1]
-
-    if file_type == "txt":
-        audio_text = read_text_from_file(audio_path)
-    else:
-        audio_text = file_to_base64(audio_path)
-    return audio_text
-
+def get_audio_text(audio_file_name):
+    audio_path = os.path.join(get_config_value('common', 'audio_files_repo'), audio_file_name)
+    audio_bytes = read_from_file(audio_path)
+    if not audio_utils.is_base64_encoded(audio_bytes):
+        audio_bytes = audio_utils.encode_audio_bytes(audio_bytes)
+    return audio_bytes
 
 def read_test_data(file_path):
     with open(file_path, newline='',encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         return list(reader)
-
-
-def break_long_lines(message, max_line_length=100):
-    lines = message.split('\n')
-    wrapped_lines = []
-
-    for line in lines:
-        if len(line) > max_line_length:
-            wrapped_lines.extend(textwrap.wrap(line, width=max_line_length))
-        else:
-            wrapped_lines.append(line)
-
-    return '\n'.join(wrapped_lines)

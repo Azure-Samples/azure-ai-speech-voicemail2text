@@ -13,10 +13,13 @@ from azure.cognitiveservices.speech.enums import ProfanityOption
 from v2ticlib import config_utils
 from v2ticlib.logger_utils import log, debug, CONTEXT
 import v2ticlib.constants.fields as Fields
+import v2ticlib.constants.constants as Constants
 import v2ticlib.string_utils as string_utils
 import v2ticlib.thread_pool_executor_utils as thread_pool_executor
 import AcsClient.constants.constants as Acs_Constants
 import AcsClient.constants.fields as Acs_Fields
+from AcsClient.speech_resource_repository import speech_resource_repository
+from AcsClient.speech_resource import SpeechResource
 import v2ticlib.request_utils as request_utils
 
 class AcsClient():
@@ -33,12 +36,6 @@ class AcsClient():
             return value
         value = self.get_property(field, literal_eval)
         return value
-
-    def get_speech_region(self):
-        return self.get_property("speech_region")
-
-    def get_speech_key(self):
-        return self.get_property("speech_key")
 
     def get_default_language(self):
         return self.get_property("default_language")
@@ -89,12 +86,16 @@ class AcsClient():
     def get_sdk_log_filename(self):
         return self.get_property("sdk_logs.log_filename")
 
-    def get_endpoint(self):
-        endpoint = self.get_property("end_point")
-        return endpoint
-
     def get_fail_safe_timeout(self):
         return config_utils.get_timelength_property_secs(self._config_base, "fail_safe_timeout")
+
+    def get_endpoint(self, request):
+        speech_resource:SpeechResource = request_utils.get_speech_resource(request)
+        return speech_resource.endpoint
+
+    def get_key(self, request):
+        speech_resource:SpeechResource = request_utils.get_speech_resource(request)
+        return speech_resource.key
 
     def get_speech_config_details(self, request) -> dict:
         speech_config = {}
@@ -110,16 +111,23 @@ class AcsClient():
         speech_config[Acs_Fields.HARD_TAT_HANDLER] = self.get_hard_tat_handler()
         speech_config[Acs_Fields.SDK_LOGS_ENABLED] = self.is_sdk_logs_enabled()
         speech_config[Acs_Fields.SDK_LOG_FILENAME] = self.get_sdk_log_filename()
-        speech_config[Acs_Fields.SPEECH_ENDPOINT] = self.get_endpoint()
+        speech_config[Acs_Fields.SPEECH_ENDPOINT] = self.get_endpoint(request)
         speech_config[Acs_Fields.POST_PROCESSING_OPTION] = Acs_Constants.TRUETEXT
         speech_config[Acs_Fields.OUTPUT_FORMAT] = speechsdk.OutputFormat.Detailed
         speech_config[Acs_Fields.PHRASE_DETECTION_MODE] = Acs_Constants.CONVERSATION
         speech_config[Acs_Fields.CONVERSATION_SEGMENTATION_MODE] = Acs_Constants.CUSTOM
         return speech_config
 
+    def log_speech_config_details(self, request):
+        speech_config_dict = self.get_speech_config_details(request)
+        self.do_log_speech_config_details(speech_config_dict)
+
+    def do_log_speech_config_details(self, speech_config_dict):
+        log(f'{Acs_Fields.SPEECH_CONFIG} : {speech_config_dict}')
+
     def get_speech_config(self, request):
         speech_config_dict = self.get_speech_config_details(request)
-        speech_config = speechsdk.SpeechConfig(endpoint=speech_config_dict[Acs_Fields.SPEECH_ENDPOINT], subscription=self.get_speech_key())
+        speech_config = speechsdk.SpeechConfig(endpoint=self.get_endpoint(request), subscription=self.get_key(request))
         speech_config.output_format = speech_config_dict[Acs_Fields.OUTPUT_FORMAT]
         speech_config.request_word_level_timestamps()
         speech_config.set_property(property_id=speechsdk.PropertyId.SpeechServiceResponse_PostProcessingOption, value=speech_config_dict[Acs_Fields.POST_PROCESSING_OPTION])
@@ -155,7 +163,6 @@ class AcsClient():
         else:
             speech_config_dict.pop(Acs_Fields.TAG_VALUE)
 
-        log(f'{Acs_Fields.SPEECH_CONFIG} : {speech_config_dict}')
         return speech_config
 
     def get_max_timeout(self, request):
@@ -166,22 +173,25 @@ class AcsClient():
 
     async def transcribe(self, request):
         try:
+            speech_resource = speech_resource_repository.get_speech_resource()
+            log(f'Using speech resource: {speech_resource}')
+            request_utils.set_speech_resource(request, speech_resource)
             timeout = self.get_max_timeout(request) + self.get_fail_safe_timeout()
             await thread_pool_executor.run_executor_async_with_timeout(timeout, self._config_base, self.do_transcribe, request)
         except Exception as e:
             log(f'Caught exception during transcription: {str(e)}')
             raise e
 
-    def finalize_recognition_result(self, recognition_result):
+    def finalize_recognition_result(self, request, recognition_result):
         if (len(recognition_result[Fields.TEXT]) > 0):
             recognition_result[Fields.WEIGHTED_CONFIDENCE] = recognition_result[Fields.CONFIDENCE] / recognition_result[Fields.DURATION]
+
         recognition_result[Fields.TEXT] = self.join_recognition_text(recognition_result[Fields.TEXT])
         recognition_result[Fields.DISPLAY_TEXT] = self.join_recognition_text(recognition_result[Fields.DISPLAY_TEXT])
         recognition_result[Fields.ITN_TEXT] = self.join_recognition_text(recognition_result[Fields.ITN_TEXT])
 
         recognition_result[Fields.GLOBAL_CONFIDENCE_SCORE] = round(recognition_result[Fields.WEIGHTED_CONFIDENCE]*100, 1)
-        final_audio_length_msecs = int(round(recognition_result[Fields.FINAL_AUDIO_LENGTH_SECS]*1000, 1))
-        recognition_result[Fields.FINAL_AUDIO_LENGTH_MSECS] = final_audio_length_msecs
+        request_utils.set_recognition_result(request, recognition_result)
 
     def join_recognition_text(self, texts:list):
         text = " ".join(texts)
@@ -233,19 +243,33 @@ class AcsClient():
         CONTEXT.set(scrid)
 
         audio_config = self.get_audio_config(request)
+        self.log_speech_config_details(request)
         speech_config = self.get_speech_config(request)
         languages:list = request_utils.get_requested_languages(request)
 
         recognition_result = self.get_recognition_result_object()
 
         recognition_result[Fields.FINAL_AUDIO_LENGTH_SECS] = request_utils.get_audio_length(request)
+        recognition_result[Fields.FINAL_AUDIO_LENGTH_MSECS] = int(round(recognition_result[Fields.FINAL_AUDIO_LENGTH_SECS]*1000, 1))
         recognition_result[Fields.LID_ENABLED] = request_utils.is_lid_enabled(request)
         recognition_result[Fields.REQUESTED_LANGUAGES] = self.join_languages(languages)
         timeout = self.get_max_timeout(request)
 
-        self.do_do_transcribe(scrid, languages, audio_config, timeout, recognition_result, speech_config)
+        try:
+            self.do_do_transcribe(scrid, languages, audio_config, timeout, recognition_result, speech_config)
+            self.finalize_recognition_result(request, recognition_result)
+        except TimeoutError as timeout_error:
+            log(f'Caught timeout error: {str(timeout_error)}')
+            self.handle_timeout(request, recognition_result)
+        except Exception as exception:
+            raise exception
 
-        self.finalize_recognition_result(recognition_result)
+    def handle_timeout(self, request, recognition_result):
+        recognition_result[Fields.CONVERSION_STATUS] = Constants.TIMEDOUT
+        recognition_result[Fields.TEXT] = ''
+        recognition_result[Fields.DISPLAY_TEXT] = ''
+        recognition_result[Fields.ITN_TEXT] = ''
+        recognition_result[Fields.GLOBAL_CONFIDENCE_SCORE] = 0
         request_utils.set_recognition_result(request, recognition_result)
 
     def do_do_transcribe(self, scrid, languages, audio_config, timeout, recognition_result, speech_config):
@@ -304,7 +328,7 @@ class AcsClient():
         try:
             if signaled is False:
                 log('timed out waiting for recognition to finish')
-                raise Exception(f'timed out waiting for recognition to finish after {timeout} seconds')
+                raise TimeoutError(f'timed out waiting for recognition to finish after {timeout} seconds')
         finally:
             log('calling stop_continuous_recognition')
             speech_recognizer.stop_continuous_recognition()

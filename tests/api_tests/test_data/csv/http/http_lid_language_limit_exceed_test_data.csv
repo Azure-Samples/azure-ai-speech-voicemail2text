@@ -1,0 +1,3 @@
+lid_enabled,lid_mode,language,audio_file,content_encoding,content_type,detected_languages,recognition_status
+"True","Continuous","en-US, es-MX, af-ZA, am-ET, ar-AE, ar-BH, ar-DZ, ar-EG, ar-IL, ar-IQ, ar-JO, ar-KW",en-US_es-MX_es-MX-es-MX_en-US.wav,base64,text/plain,"en-US, es-MX, en-US",Unconvertible
+"True","AtStartHighAccuracy","en-US, es-MX, ja-JP, ar-LB, ar-LY, ar-MA",en-US.txt,base64,text/plain,"en-US",Unconvertible

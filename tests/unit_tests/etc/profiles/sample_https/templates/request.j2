@@ -1,0 +1,37 @@
+{
+  "pass_through_data": {
+    "external_id": "1e8f17e2-4750-415c-8768-61a048012133",
+    "called_number": "Anonymous",
+    "calling_number": "123456"
+  },
+  "metadata": {
+     "log_transcriptions_enabled": "False",
+     "respond_with_audio_enabled": "False",
+     "language": "en-US",
+     "language_configuration": {
+        "en-US": {
+           "min_confidence_percentage": "60",
+           "max_audio_length_secs": "240"
+        },
+        "es-US": {
+           "min_confidence_percentage": "55",
+           "max_audio_length_secs": "240"
+        },
+        "lid": {
+           "min_confidence_percentage": "55",
+           "max_audio_length_secs": "240"
+        },
+        "default": {
+           "min_confidence_percentage": "55",
+           "max_audio_length_secs": "240"
+        }
+     },
+     "acs_client": {
+        "lid_enabled": "{{ request.acs_client.lid_enabled }}",
+        "lid_mode": "{{ request.acs_client.lid_mode }}",
+        "profanity_option": "{{ request.acs_client.profanity_option }}",
+        "tagging_enabled": "{{ request.acs_client.tagging_enabled }}",
+        "tag_value": "{{ request.acs_client.tag_value }}"
+      }
+  }
+}

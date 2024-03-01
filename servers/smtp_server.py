@@ -5,7 +5,7 @@
 
 
 
-import os, sys, typing, ssl
+import os, sys, typing, traceback
 import asyncio
 import email
 from email.message import EmailMessage
@@ -23,6 +23,7 @@ from v2ticlib.template_utils import template_utils
 import v2ticlib.coroutine_timeout_utils as coroutine_timeout
 import v2ticlib.request_utils as request_utils
 import v2ticlib.ssl_context_utils as ssl_context_utils
+from v2ticlib import header_utils
 
 consume_request_timeout = config_utils.get_consume_request_timeout()
 global keep_server_alive
@@ -43,6 +44,12 @@ class SMTPHandler():
     def get_default_return_code(self):
         return self.get_property('default_return_code')
 
+    def use_mailfrom_on_empty_from_header(self):
+        return self.get_property('use_mailfrom_on_empty_from_header', literal_eval=True)
+
+    def use_rcpttos_on_empty_to_header(self):
+        return self.get_property('use_rcpttos_on_empty_to_header', literal_eval=True)
+
     def get_return_code(self, request):
         return_code:str = self.get_default_return_code()
         if template_utils.has_smtp_return_code_template():
@@ -56,19 +63,22 @@ class SMTPHandler():
         CONTEXT.set(initial_request_content[SCRID])
 
         mail_from = envelope.mail_from
-        mail_to = envelope.rcpt_tos
-        log(f'Received message From: {mail_from} with To: {mail_to}')
+
+        rcpt_tos = envelope.rcpt_tos
+        log(f'Received message mail_from: {mail_from} with rctp_tos: {rcpt_tos}')
 
         try:
-            return await coroutine_timeout.timeout_after(self.do_handle_DATA(initial_request_content, mail_from, mail_to, envelope), timeout=consume_request_timeout)
+            return await coroutine_timeout.timeout_after(self.do_handle_DATA(initial_request_content, mail_from, rcpt_tos, envelope), timeout=consume_request_timeout)
         except Exception as e:
-            raise e
+            stack = traceback.format_exc()
+            log(f'Timed out processing request: {e} - {stack}')
+            return f'455 Timed out processing request - {str(e)}'
 
-    async def do_handle_DATA(self, initial_request_content:dict, mail_from, mail_to, envelope):
+    async def do_handle_DATA(self, initial_request_content:dict, mail_from, rcpt_tos, envelope):
         email_message: EmailMessage = email.message_from_bytes(envelope.content)
-        headers = dict(email_message.items())
-        headers[FROM] = mail_from
-        headers[TO] = mail_to
+        headers = header_utils.decode_headers(dict(email_message.items()))
+
+        self.handle_empty_headers(headers, mail_from, rcpt_tos)
 
         audio_bytes = None
         if email_message.is_multipart():
@@ -79,11 +89,22 @@ class SMTPHandler():
         try:
             request = self.handle_request(initial_request_content, headers, audio_bytes)
         except Exception as e:
-            raise e
+            stack = traceback.format_exc()
+            log(f'Error processing request: {e} - {stack}')
+            return f'455 Error processing request - {str(e)}'
 
         return_code = self.get_return_code(request)
         log(f'Returning: {return_code}')
         return return_code
+
+    def handle_empty_headers(self, headers: typing.Mapping[str, str], mail_from:str, rcpt_tos:typing.List[str]):
+        if not headers.get(FROM) and self.use_mailfrom_on_empty_from_header():
+            log('Using mail_from as From header value')
+            headers[FROM] = header_utils.decode_header(mail_from)
+
+        if not headers.get(TO) and self.use_rcpttos_on_empty_to_header():
+            log('Using rcpt_tos as To header value')
+            headers[TO] = [header_utils.decode_header(rcpt_to) for rcpt_to in rcpt_tos]
 
     def parse_multipart_request(self, email_message:EmailMessage):
         message_bytes = b''

@@ -5,8 +5,11 @@
     "calling_number": "{{context.headers['X-Caller']}}"
   },
   "metadata": {
-     "log_transcriptions_enabled": "False",
-     "respond_with_audio_enabled": "False",
+     "log_transcriptions_enabled": "{{context.headers['X-LogTranscriptionEnabled']}}",
+     "respond_with_audio_enabled": "{{context.headers['X-RespondWithAudioEnabled']}}",
+     "truncate_lengthy_transcriptions_enabled": "{{context.headers['X-TruncateLengthyTranscriptionsEnabled']}}",
+     "max_transcription_length": "{{context.headers['X-MaxTranscriptionLength']}}",
+     "max_transcription_line_length": "{{context.headers['X-MaxTranscriptionLineLength']}}",
      "language": "{{context.headers['X-Language']}}",
      "language_configuration": {
         "en-US": {
@@ -29,7 +32,9 @@
      "acs_client": {
         "lid_enabled": "{{context.headers['X-LidEnabled']}}",
         "lid_mode": "{{context.headers['X-LidMode']}}",
-        "profanity_option": "Masked"
+        "profanity_option": "{{context.headers['X-ProfanityOption']}}",
+        "tagging_enabled": "{{context.headers['X-TaggingEnabled']}}",
+        "tag_value": "{{context.headers['X-TagValue']}}"
       }
   }
 }

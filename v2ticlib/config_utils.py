@@ -12,15 +12,25 @@ import ast
 from timelength import TimeLength
 import v2ticlib.constants.constants as Constants
 
-config = configparser.ConfigParser(interpolation=ExtendedInterpolation())
-config.read("etc/config/config.properties")
-
-config_base = Constants.V2TIC
-
-def get_property(base:str, property:str, literal_eval=False):
+def get_env_property(base:str, property:str):
     base = base.replace('.', '_')
     env_property = property.replace('.', '_')
     value = os.getenv('_'.join([base, env_property]))
+    return value
+
+def get_env_property_or_default(base:str, property:str, default:str):
+    value = get_env_property(base, property)
+    if value is None:
+        return default
+    return value
+
+config = configparser.ConfigParser(interpolation=ExtendedInterpolation())
+config_base = Constants.V2TIC
+config_file_name = get_env_property_or_default(config_base, 'config_file_path', 'etc/config/config.properties')
+config.read(config_file_name)
+
+def get_property(base:str, property:str, literal_eval=False):
+    value = get_env_property(base, property)
     if value is None:
         value = config.get(base, property)
 
@@ -79,3 +89,6 @@ def get_client_key_file():
 
 def get_client_trusted_certs_path():
     return get_property(config_base, 'client_trusted_certs_path')
+
+def get_locking_default_timeout():
+    return get_timelength_property_secs(config_base, 'locking_default_timeout')

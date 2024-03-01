@@ -1,0 +1,31 @@
+{
+   {# optionally put response_address or will default to configured smtp.response_host:smtp.reponse_port
+   "response_address": "",
+   #}
+
+   {# fetch required metadata from pass_through_data or from original request headers #}
+   "mail_from": "{{request.pass_through_data.mail_from}}",
+   "rcpt_to": "{{request.headers.From}}",
+
+   "headers": {
+     "From": "{{request.headers['Reply-To']}}",
+     "To": "{{request.headers.From}}",
+     "Content-Type": "text/plain; charset=utf-8",
+     "MIME-Version": "1.0",
+     "Subject": "{{request.pass_through_data.message_id}}",
+     "X-Reference": "{{request.headers['X-Reference']}}",
+     "Content-Transfer-Encoding":"7bit",
+     "X-Scrid": "{{request.scrid}}",
+      {% if request.status == "Success" -%}
+         "X-RTF": "{{request.recognition_result.rtf}}",
+         {% if(request.recognition_result.conversion_status == "Transcribed" and request.recognition_result.lid_enabled) -%}
+         "X-Detected-Language-Constellation": "{{request.recognition_result.detected_languages}}",
+         {%- endif %}
+      {%- endif %}
+      "Connection": "close"
+   },
+   "body": {
+      "import": "response_body.j2",
+      "encoding": "utf-8"
+   }
+}

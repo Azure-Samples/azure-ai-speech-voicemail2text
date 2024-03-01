@@ -1,0 +1,2 @@
+language,audio_file,content_encoding,content_type,status,recognition_status,confidence_score_min,rtf_max
+en-US,empty_audio.txt,base64,text/plain,Success,Transcribed,60,5

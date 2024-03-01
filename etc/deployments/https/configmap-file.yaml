@@ -15,6 +15,7 @@ data:
   v2tic_verify_mode: "REQUIRED"
   v2tic_authorized_client_certs_path: /app/etc/certs/authorized_client_certs
   v2tic_client_trusted_certs_path: /app/etc/certs/client/trusted_certs
+  v2tic_config_file_path: /app/etc/config/config.properties
 
   profiles_folder: /app/etc/profiles/sample_https
   profiles_profile: etc.profiles.sample_https.profile.SampleHttpsProfile
@@ -45,9 +46,6 @@ data:
   acs_client_lid_enabled: "True"
   acs_client_default_language: en-US
   acs_client_default_languages: "['en-US', 'es-MX']"
-  acs_client_speech_key: $SPEECH_KEY
-  acs_client_end_point: $END_POINT
-
   acs_client_audio_multiplier: "5"
   # Continuous or AtStart or AtStartHighAccuracy
   acs_client_lid_mode: AtStartHighAccuracy
@@ -58,3 +56,6 @@ data:
   acs_client_tag_value: "test run 1"
   # fail-safe timeout the ACS request if still active 30 seconds after audio_mulitplier*audio_length seconds
   acs_client_fail_safe_timeout: 30 seconds
+  acs_client_speech_resources: $SPEECH_RESOURCES
+  acs_client_region_failover_threshold: "3"
+  acs_client_region_failover_enabled: "True"

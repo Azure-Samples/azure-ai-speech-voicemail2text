@@ -4,7 +4,6 @@
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
 
-
 from v2ticlib.template_utils import template_utils
 from v2ticlib.logger_utils import log
 import v2ticlib.constants.fields as Fields
@@ -38,17 +37,11 @@ class ResponseCreator():
 
         self.resolve_respond_with_audio_enabled(request, recognition_result)
 
-        self.resolve_transcription_text_wrapping(request, self.transcription_text_fields, recognition_result)
+        self.resolve_transcription_text_wrapping(request, recognition_result)
 
         self.resolve_logging_transcription(request, recognition_result)
 
         request_utils.set_recognition_result(request, recognition_result)
-
-    def resolve_transcription_text_wrapping(self, request:dict, fields:list, recognition_result:dict):
-        max_transcription_line_length = request_utils.get_max_transcription_line_length(request)
-        for field in fields:
-            value = recognition_result[field]
-            recognition_result[field] = textwrap.fill(text=value, width=max_transcription_line_length)
 
     def resolve_truncated_audio(self, request:dict, recognition_result:dict):
         truncated = Constants.FALSE
@@ -57,6 +50,9 @@ class ResponseCreator():
         recognition_result[Fields.AUDIO_TRUNCATED] = truncated
 
     def resolve_conversion_status(self, request:dict, recognition_result:dict):
+        if self.has_conversion_status(recognition_result):
+            return
+
         min_confidence_percentage = request_utils.get_min_confidence_percentage(request)
         recognition_result[Fields.CONVERSION_STATUS] = self.get_conversion_status(recognition_result, min_confidence_percentage)
         if recognition_result[Fields.CONVERSION_STATUS] == Constants.UNCONVERTIBLE:
@@ -64,6 +60,9 @@ class ResponseCreator():
             recognition_result[Fields.TEXT] = ''
             recognition_result[Fields.DISPLAY_TEXT] = ''
             recognition_result[Fields.ITN_TEXT] = ''
+
+    def has_conversion_status(self, recognition_result:dict):
+        return string_utils.is_not_blank(recognition_result.get(Fields.CONVERSION_STATUS))
 
     def get_conversion_status(self, recognition_result:dict, min_confidence_percentage:int):
         if string_utils.is_blank(recognition_result[Fields.TEXT]):
@@ -102,6 +101,15 @@ class ResponseCreator():
         recognition_result[Fields.RESPOND_WITH_AUDIO_ENABLED] = respond_with_audio_enabled
         if respond_with_audio_enabled:
             recognition_result[Fields.ORIGINAL_AUDIO] = request_utils.get_original_audio(request)
+
+    def resolve_transcription_text_wrapping(self, request:dict, recognition_result:dict):
+        if recognition_result[Fields.CONVERSION_STATUS] != Constants.TRANSCRIBED:
+            return
+
+        max_transcription_line_length = request_utils.get_max_transcription_line_length(request)
+        for field in self.transcription_text_fields:
+            value = recognition_result[field]
+            recognition_result[field] = textwrap.fill(text=value, width=max_transcription_line_length)
 
     def resolve_logging_transcription(self, request:dict, recognition_result:dict):
         log_transcriptions_enabled:bool = request_utils.is_log_transcriptions_enabled(request)

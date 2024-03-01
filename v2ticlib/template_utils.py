@@ -4,13 +4,8 @@
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
 
-
-import json
 from typing import Final
-import os
-import enum
-import typing
-import quopri
+import os, enum, typing, json
 from v2ticlib import config_utils
 import v2ticlib.string_utils as string_utils
 from jinja2 import Environment, FileSystemLoader, Template
@@ -19,6 +14,7 @@ import v2ticlib.constants.fields as Fields
 import v2ticlib.constants.constants as Constants
 import v2ticlib.converter_utils as converter_utils
 import v2ticlib.request_utils as request_utils
+import v2ticlib.header_utils as header_utils
 
 class TemplateTypeEnums(enum.Enum):
     request = 'request.j2'
@@ -121,10 +117,8 @@ class TemplateUtils():
         header_str:str = self._render_import(header_value, context)
 
         encoding = header_value[Fields.ENCODING]
-        encoded_header:bytes = header_str.encode(encoding)
-        quopri_header = quopri.encodestring(encoded_header)
-        content_type =  Constants.US_ASCII
-        return quopri_header.decode(content_type)
+
+        return header_utils.encode_header(header_str, encoding)
 
     def _render_body(self, body, context):
         if body is None or type(body) == str:

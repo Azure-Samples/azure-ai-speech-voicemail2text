@@ -20,7 +20,7 @@ def create_ssl_context():
 async def send_email_with_audio_attachment(host, port):
     # Email configuration
     mail_from = 'sender@example.com'
-    rcpt_to = 'receiver@example.com'
+    rcpt_to = ['receiver1@example.com', 'receiver2@example.com']
 
     smtp_server = host
     smtp_port = port
@@ -37,7 +37,7 @@ async def send_email_with_audio_attachment(host, port):
         "From": "11111111",
         "respondWithAudio": "False",
         "Content-Transfer-Encoding": "base64",
-        "To": rcpt_to
+        #"To": rcpt_to
     }
     content = None
     # Attach audio file
@@ -54,9 +54,14 @@ async def send_email_with_audio_attachment(host, port):
         for k,v in headers.items():
             message.add_header(k, v)
 
+        #Below is an example of how to set header values with special characters like double quotes (")
+        #from email.header import Header
+        #message['From'] = Header('"1234567" <sender@example.com>', 'utf-8')
+
         message.set_payload(content)
 
         return_tuple = await smtp_client.send_message(message, sender=mail_from, recipients=rcpt_to)
+        print(return_tuple)
         print(f'return code: {return_tuple[1]}')
 
 # Run the email sending coroutine

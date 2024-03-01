@@ -15,12 +15,22 @@ class AcsClientLid(AcsClient):
     def get_lid_mode(self, request):
         return self.get_runtime_property(request, Fields.LID_MODE)
 
+    def log_speech_config_details(self, request):
+        speech_config_dict = self.get_speech_config_details(request)
+        speech_config_dict[Fields.LID_ENABLED] = True
+        lid_mode = self.get_lid_mode(request)
+        speech_config_dict[Fields.LID_MODE] = lid_mode
+        self.do_log_speech_config_details(speech_config_dict)
+
     def get_speech_config(self, request):
         speech_config = super().get_speech_config(request)
         lid_mode = self.get_lid_mode(request)
         speech_config.set_property(property_id=speechsdk.PropertyId.SpeechServiceConnection_LanguageIdMode, value=lid_mode)
-        log(f"'lid_mode': {lid_mode}")
         return speech_config
+
+    def handle_timeout(self, request, recognition_result):
+        recognition_result[Fields.DETECTED_LANGUAGES] = ''
+        super().handle_timeout(request, recognition_result)
 
     def do_do_transcribe(self, scrid, languages, audio_config, timeout, recognition_result, speech_config):
         recognition_result[Fields.DETECTED_LANGUAGES] = []

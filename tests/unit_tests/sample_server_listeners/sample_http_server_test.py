@@ -182,7 +182,7 @@ class TestSampleHTTPServer(unittest.TestCase):
                 mock_ssl_context.wrap_socket.assert_called_once_with(mock_socket, server_side=True)
                 #AC2 - assert the HTTP server is listening on port 8443 and print the message
                 mock_http_server.assert_called_once_with(('mocked_host', 8443), SimpleSampleHTTPServer)
-                #mock_print.assert_called_once_with('Listening for responses on https://mocked_host:8443/response')
+                #mock_print.assert_called_once_with('HTTPS Server listening for responses on https://mocked_host:8443/response')
                 mock_http_server_instance.serve_forever.assert_called_once()
 
     def test_create_ssl_context(self):
