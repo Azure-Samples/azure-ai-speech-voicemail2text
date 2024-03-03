@@ -42,12 +42,11 @@ Open the project in [Visual Studio Code](https://code.visualstudio.com/download)
 > In the Makefile in the root folder, you **must** populate the list of tuple `SPEECH_RESOURCES` value with your speech key and end point url.
 > max size of SPEECH_RESOURCES is 2 tuples
 >
-> **Examples**: 
+> **Examples**:
 1. 1 pair of speech key and endpoint. Region failover is not enabled
- `SPEECH_RESOURCES := [('******************************8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2')]`
+ `SPEECH_RESOURCES := "[('******************************8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2')]"`
 2. 2 pairs of speech key and endpoint. Region failover is enabled
-`SPEECH_RESOURCES := [('******************************8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2'), ('******************************fe','wss://eastus.stt.speech.microsoft.com/speech/universal/v2')]`
-
+`SPEECH_RESOURCES := "[('******************************8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2'), ('******************************fe','wss://eastus.stt.speech.microsoft.com/speech/universal/v2')]"`
 
 **Optional**: If needed, modify the _configmap-file.yaml_ file to override configuration values under etc/deployments.
 
