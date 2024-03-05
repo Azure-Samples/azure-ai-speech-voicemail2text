@@ -3,8 +3,8 @@
 .PHONY: default_make build_image check_minikube_status start_minikube load_image deploy_pod start_dashboard get_status destroy_pod enable_autoscale destroy_autoscale ssh_pod clean quick_start test_local
 
 # Input speech key and endpoint tuple list (public or private) to get started
-SPEECH_RESOURCES := [('bac6a970e42345dc877be170eefc9c8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2')]
-#SPEECH_RESOURCES := [('bac6a970e42345dc877be170eefc9c8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2'), ('05455fd708c344a5a326689856ab16fe','wss://eastus.stt.speech.microsoft.com/speech/universal/v2')]
+SPEECH_RESOURCES := "[('bac6a970e42345dc877be170eefc9c8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2')]"
+#SPEECH_RESOURCES := "[('bac6a970e42345dc877be170eefc9c8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2'), ('05455fd708c344a5a326689856ab16fe','wss://eastus.stt.speech.microsoft.com/speech/universal/v2')]"
 
 # Provide a value of IMAGE_NAME= while calling target build_image, else it will default to 'default_image_<datetimestamp>'
 # Eg: make build_image image_name=image_vmcs_01
@@ -54,12 +54,12 @@ load_image:
 	rm -rf scratch
 
 deploy_pod:
-	@eval export DEPLOYMENT=$(deployment);\
-	export DEPLOY_IMAGE_NAME=$(image_name);\
-	export SPEECH_RESOURCES=$(SPEECH_RESOURCES);\
-
+	@eval "export DEPLOYMENT=$(deployment)" ;\
+	echo "Deploying $$DEPLOYMENT" ;\
+	export DEPLOY_IMAGE_NAME=$(image_name) ;\
+	export SPEECH_RESOURCES=$(SPEECH_RESOURCES) ;\
 	echo $$DEPLOYMENT ;\
-	if [ -z "$(SPEECH_RESOURCES)" ]; then\
+	if [ -z $(SPEECH_RESOURCES) ]; then\
 		echo "SPEECH_RESOURCES was not provided, please review Makefile and ensure its value is not empty" && exit 1;\
 	fi ;\
 	envsubst < etc/deployments/$$DEPLOYMENT/configmap-file.yaml > etc/deployments/$$DEPLOYMENT/configmap-file-instance.yaml ;\

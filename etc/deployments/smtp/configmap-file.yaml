@@ -65,6 +65,6 @@ data:
   acs_client_tag_value: "test run 1"
   # fail-safe timeout the ACS request if still active 30 seconds after audio_mulitplier*audio_length seconds
   acs_client_fail_safe_timeout: 30 seconds
-  acs_client_speech_resources: $SPEECH_RESOURCES
+  acs_client_speech_resources: "$SPEECH_RESOURCES"
   acs_client_region_failover_threshold: "3"
   acs_client_region_failover_enabled: "True"
