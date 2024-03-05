@@ -21,6 +21,7 @@ Option 1:  **_Server-side_**
 Option 2: **_Client-side_**
 
 - [Python 3.9](https://www.python.org/downloads/release/python-390/) (To run sample_server_listeners)
+- [Pip](https://pypi.org/project/pip/)
   - Open Command Prompt/terminal.
   - Navigate to the location of your **azure-ai-speech-voicemail2text** folder.
   - Run command **pip install -r requirements.txt**.
@@ -39,8 +40,8 @@ cd azure-ai-speech-voicemail2text
 Open the project in [Visual Studio Code](https://code.visualstudio.com/download) or any other editor.
 
 > [!IMPORTANT]
-> In the Makefile in the root folder, you **must** populate the list of tuple `SPEECH_RESOURCES` value with your speech key and end point url.
-> max size of SPEECH_RESOURCES is 2 tuples
+> In the Makefile in the root folder, you **must** populate the list of tuple `SPEECH_RESOURCES` values with your speech key and endpoint URL.
+> The maximum number of tuples in SPEECH_RESOURCES is 2.
 >
 > **Examples**: 
 1. 1 pair of speech key and endpoint. Region failover is not enabled
@@ -52,6 +53,10 @@ Open the project in [Visual Studio Code](https://code.visualstudio.com/download)
 **Optional**: If needed, modify the _configmap-file.yaml_ file to override configuration values under etc/deployments.
 
 ## Getting Started
+
+- In the scenarios outlined below, Ubuntu 20.04 was used in Linux testing.
+- Depending on your installation, the commands below may require sudo.
+- Depending on your installation package of python, you may need to input python3.9 instead of python.
 
 Run these commands to build, load and deploy a docker image. All commands must be run in a Git Bash terminal
 
