@@ -20,7 +20,7 @@ Option 1:  **_Server-side_**
 
 Option 2: **_Client-side_**
 
-- [Python 3.9](https://www.python.org/downloads/release/python-390/) (To run sample_server_listeners)
+- [Python 3.9](https://www.python.org/downloads/release/python-390/) (To run sample server listeners and sample clients)
 - [Pip](https://pypi.org/project/pip/)
   - Open Command Prompt/terminal.
   - Navigate to the location of your **azure-ai-speech-voicemail2text** folder.
