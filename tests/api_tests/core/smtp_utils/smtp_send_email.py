@@ -25,9 +25,10 @@ async def send_email(sender_email:str, receiver_email:str, message):
     smtp_server = get_config_value('smtptest', 'smtp_server_url')
     smtp_port = get_config_value('smtptest', 'smtp_server_port')
     ssl_context = create_ssl_context()
+    timeout=int(get_config_value('common', 'fetch_scrid_from_listener_timeout'))
     smtp = SMTP(hostname=smtp_server, port=smtp_port, tls_context=ssl_context, start_tls=True)
     await smtp.connect()
-    request_ack = await smtp.send_message(message, sender=sender_email, recipients=receiver_email)
+    request_ack = await smtp.send_message(message, sender=sender_email, recipients=receiver_email, timeout=timeout)
     await smtp.quit()
 
     print(f"Acknowledgement after sending mail: {request_ack}")

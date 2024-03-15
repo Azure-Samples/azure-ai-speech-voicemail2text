@@ -12,8 +12,10 @@ import api_tests.tests.http_tests.http_common_test as http_common_test
 
 @pytest.mark.usefixtures('http_listener_fixture')
 @pytest.mark.usefixtures('http_server_fixture')
+@pytest.mark.usefixtures('http_pod_fixture')
 @pytest.mark.httpcodecs
 @pytest.mark.httpregression
+@pytest.mark.httppodregression
 def test_audio_transcription_for_codecs(http_codecs_test):
     test_data = http_codecs_test
     response = http_common_test.test_http(test_data)

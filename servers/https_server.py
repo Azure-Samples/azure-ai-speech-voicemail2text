@@ -10,13 +10,13 @@ import sys, os, typing, traceback
 from aiohttp import web
 from aiohttp.web import Request
 from aiohttp.web import middleware
+from aiohttp.web_runner import GracefulExit
 from http import HTTPStatus
 
 sys.path.append(os.path.join(os.path.abspath(os.curdir)))
 from v2ticlib.logger_utils import log, CONTEXT
 from Common.request_injestor import RequestInjestor
 import Common.request_handler as request_handler
-
 from v2ticlib import config_utils
 from v2ticlib.constants.protocols import HTTPS
 from v2ticlib.constants.fields import SCRID, DELIVERY_TYPE
@@ -100,6 +100,7 @@ async def start_https_server():
     site = web.TCPSite(runner, host=host, port=port, ssl_context=ssl_context)
     await site.start()
     print(f'HTTPS Server Listening On: {host}:{port}')
+
     global keep_server_alive
     while keep_server_alive:
         await asyncio.sleep(1)

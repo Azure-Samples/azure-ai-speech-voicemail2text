@@ -103,9 +103,8 @@ class MakeUtils(object):
         validate('Deleted pod-file.yaml',actual_output , 'Validate pod file deleted', contains=True)
         validate('Deleted configmap-file-instance.yaml', actual_output, 'Validate configmap file deleted', contains=True)
 
-    def quick_start(self):
-        deployment = 'https'
-        std_out, std_err, return_code = self.rc.popen_with_output(f"make quick_start", '.', 420)
+    def quick_start(self, deployment='https'):
+        std_out, std_err, return_code = self.rc.popen_with_output(f"make quick_start deployment={deployment}", '.', 420)
         actual_output = str(std_out)
 
         validate(expected='Minikube is already running', expected2='Done! kubectl is now configured to use "minikube" cluster',

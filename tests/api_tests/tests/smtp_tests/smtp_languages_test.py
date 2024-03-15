@@ -12,9 +12,11 @@ from api_tests.tests.fixtures.smtp_server_fixture import smtp_server_fixture
 
 @pytest.mark.usefixtures('smtp_listener_fixture')
 @pytest.mark.usefixtures('smtp_server_fixture')
+@pytest.mark.usefixtures('smtp_pod_fixture')
 @pytest.mark.smtplanguages
 @pytest.mark.smtpregression
 @pytest.mark.asyncio
+@pytest.mark.smtppodregression
 async def test_languages(smtp_languages_test):
     test_data = smtp_languages_test
     response = await smtp_common_test.test_smtp(test_data)

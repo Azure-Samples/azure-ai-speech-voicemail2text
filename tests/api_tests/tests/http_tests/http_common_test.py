@@ -25,6 +25,11 @@ def do_test_http(test_data):
 
     # Fetch scrid from response header
     scrid = request_ack.headers.get("location")
+    response = request_handler.get_response_or_default(scrid, default=None)
+    if response is not None:
+        print(f'Received response for scrid: {scrid} from server')
+        return response
+
     response = get_response_or_timeout(scrid)
 
     return response
@@ -43,9 +48,9 @@ def get_response_or_timeout(scrid):
         # last check in case the response was received after callback was registered.
         response = request_handler.get_response_or_default(scrid, default=None)
         if response is not None:
-            print(f'Got response for scrid {scrid} from listener after timeout')
+            print(f'Got response for scrid {scrid} from listener')
             return response
-        raise TimeoutError("Timeout reached. Unable to get response")
+        raise TimeoutError(f"Timeout reached. Unable to get response within {timeout} seconds for scrid {scrid}")
 
     response = request_handler.get_response(scrid)
     return response

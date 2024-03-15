@@ -9,11 +9,16 @@ import azure.cognitiveservices.speech as speechsdk
 from v2ticlib.logger_utils import log, debug, CONTEXT
 import v2ticlib.constants.fields as Fields
 from AcsClient.acs_client import AcsClient
+import json
+import v2ticlib.metadata_utils as metadata_utils
+import v2ticlib.constants.constants as Constants
 
 class AcsClientLid(AcsClient):
-
     def get_lid_mode(self, request):
         return self.get_runtime_property(request, Fields.LID_MODE)
+    
+    def get_lid_type(self):
+        return self.get_property(Fields.LID_TYPE)
 
     def log_speech_config_details(self, request):
         speech_config_dict = self.get_speech_config_details(request)
@@ -24,8 +29,14 @@ class AcsClientLid(AcsClient):
 
     def get_speech_config(self, request):
         speech_config = super().get_speech_config(request)
-        lid_mode = self.get_lid_mode(request)
-        speech_config.set_property(property_id=speechsdk.PropertyId.SpeechServiceConnection_LanguageIdMode, value=lid_mode)
+        if self.get_lid_type() == Constants.LID_FALLBACK:
+            default_lid_fallback_language = metadata_utils.get_default_lid_fallback_language()
+            speech_config.set_service_property(name="SpeechContext-phraseDetection.language", value=default_lid_fallback_language, channel=speechsdk.ServicePropertyChannel.UriQueryParameter)
+            log(f'Using lid_fallback language = {default_lid_fallback_language} for Language identification transcription')
+        else:
+            lid_mode = self.get_lid_mode(request)
+            speech_config.set_property(property_id=speechsdk.PropertyId.SpeechServiceConnection_LanguageIdMode, value=lid_mode)
+            log(f'Using lid_mode = {lid_mode} for Language identification transcription')
         return speech_config
 
     def handle_timeout(self, request, recognition_result):
@@ -48,14 +59,11 @@ class AcsClientLid(AcsClient):
             detected_languages.append(detected_language)
 
     def recognize_multi_language(self, scrid, languages, audio_config, timeout, recognition_result, speech_config):
-
         log(f'recognize_multi_language: {languages}')
-
         auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=languages)
-
         speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config,
-                                                       audio_config=audio_config,
-                                                       auto_detect_source_language_config=auto_detect_source_language_config)
+                                                    audio_config=audio_config,
+                                                    auto_detect_source_language_config=auto_detect_source_language_config)
 
         def recognized_cb(evt: speechsdk.SpeechRecognitionEventArgs):
             CONTEXT.set(scrid)
@@ -72,4 +80,26 @@ class AcsClientLid(AcsClient):
                     self.append_detected_language(recognition_result, detected_language)
                     self.update_recognition_result(recognition_result, evt)
 
+        if self.get_lid_type() == Constants.LID_FALLBACK:
+            self.do_recognize_multi_language_fallback(scrid, speech_recognizer, recognized_cb, timeout, languages)
+            return
+
         self.do_recognize(scrid, speech_recognizer, recognized_cb, timeout)
+
+    def do_recognize_multi_language_fallback(self, scrid, speech_recognizer, recognized_cb, timeout, languages):
+        connection:speechsdk.Connection = speechsdk.Connection.from_recognizer(speech_recognizer)
+        connection.set_message_property("speech.context", "LanguageId", self.get_language_id_payload(languages))
+        try:
+            self.do_recognize(scrid, speech_recognizer, recognized_cb, timeout)
+        finally:
+            try:
+                connection.close()
+            except Exception as e:
+                log(f'Error closing speech recognizer connection: {e}')
+
+    def get_language_id_payload(self, languages):
+        payload = self.get_property("language_id_json", literal_eval=True)
+        payload["Languages"] = languages
+        payload_string = json.dumps(payload)
+        log(f'Speech Context for LID fallback feature: {payload_string}')
+        return payload_string

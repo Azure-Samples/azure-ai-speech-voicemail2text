@@ -12,10 +12,11 @@ def query_server_status(running, name, hostname, port, timeout):
 
     while True:
         status = is_port_status(hostname, port, check_running=running)
+
         if running:
-            error_message = f"{name} has not started."
+            error_message = f"{name} has not started on {hostname} and {port}."
         else:
-            error_message = f"{name} is still running."
+            error_message = f"{name} is still running on {hostname} and {port}."
 
         if status:
             break

@@ -19,19 +19,49 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.9"
+
+    - name: Setup python virtual enviornment
+      run: |
+          sudo apt-get install python3.9 python3.9-dev python3.9-venv
+          python3.9 -m venv .venv
+          source .venv/bin/activate
+          python -V
+          sudo chmod -R 777 .venv/ reports/
+          pip install -r requirements.txt
+          pip list
+
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y ffmpeg
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Test regression suite with pytest framework
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+    - name: Running unit tests
       working-directory: .
       run: |
-        echo "127.0.0.1 https-server.v2tic.com smtp-server.v2tic.com https-listener.v2tic.com smtp-listener.v2tic.com" | sudo tee -a /etc/hosts
-        pytest ./tests/api_tests -k regression --capture=tee-sys
-        pytest ./tests/unit_tests
+            source .venv/bin/activate
+            pytest ./tests/unit_tests
+
+    - name: Test regression suite with pytest framework on local setup
+      working-directory: .
+      run: |
+            source .venv/bin/activate
+            echo "127.0.0.1 https-server.v2tic.com smtp-server.v2tic.com https-listener.v2tic.com smtp-listener.v2tic.com" | sudo tee -a /etc/hosts
+            pytest ./tests/api_tests -k regression --capture=tee-sys -s
+
+    - name: Install and start minikube
+      run: |
+            curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 \
+            && chmod +x minikube && sudo mv minikube /usr/local/bin/
+            minikube start --driver=docker
+
+    - name: Test regression suite with pytest framework on pod setup
+      working-directory: .
+      run: |
+          source .venv/bin/activate
+          SERVER_IP=$(minikube ip --node minikube)
+          LISTENER_IP=$(hostname -i)
+          sudo sed -i '/https-server.v2tic.com/d' /etc/hosts
+          sudo sed -i '/https-listener.v2tic.com/d' /etc/hosts
+          echo "$SERVER_IP https-server.v2tic.com smtp-server.v2tic.com" | sudo tee -a /etc/hosts
+          echo "$LISTENER_IP https-listener.v2tic.com smtp-listener.v2tic.com" | sudo tee -a /etc/hosts
+          pytest ./tests/api_tests -k podregression --capture=tee-sys --setup_local_server=False;

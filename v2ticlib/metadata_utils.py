@@ -46,3 +46,6 @@ def respond_with_audio_enabled() -> bool:
 
 def get_max_transcription_line_length() -> int:
     return get_property('max_transcription_line_length', literal_eval=True)
+
+def get_default_lid_fallback_language() -> str:
+    return get_property('default_lid_fallback_language', literal_eval=False)

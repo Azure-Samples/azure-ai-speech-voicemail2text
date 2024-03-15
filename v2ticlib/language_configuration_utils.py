@@ -162,7 +162,7 @@ def do_is_lid_enabled(request:dict, default_func) -> bool:
 
 def is_lid_enabled(request:dict) -> bool:
     default_func = partial(config_utils.get_property, Fields.ACS_CLIENT, Fields.LID_ENABLED, literal_eval=True)
-    do_is_lid_enabled(request, default_func)
+    return do_is_lid_enabled(request, default_func)
 
 def resolve_has_no_language_field(request:dict):
     log(f'resolving without a language field')

@@ -6,7 +6,7 @@
 
 
 import configparser
-import os
+import os, ast
 
 config = configparser.ConfigParser()
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -25,3 +25,6 @@ def get_config_value(base, property):
     if value is None:
         value = config.get(base, property)
     return value
+
+def get_local_server_timeout():
+    return int(get_config_value('common', 'local_server_timeout'))

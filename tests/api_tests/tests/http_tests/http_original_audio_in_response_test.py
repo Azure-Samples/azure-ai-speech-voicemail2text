@@ -13,6 +13,7 @@ from api_tests.core.assert_utils import validate_original_audio_in_response
 @pytest.mark.usefixtures('http_server_fixture')
 @pytest.mark.httporiginalaudioinresponse
 @pytest.mark.httpregression
+@pytest.mark.httppodregression
 def test_original_audio_in_response(http_original_audio_in_response_test):
     test_data = http_original_audio_in_response_test
     response = http_common_test.test_http(test_data)

@@ -6,25 +6,38 @@
     "mail_from": "{{context.headers['Reply-To']}}",
     "reply_to": "{{context.headers.From}}",
     "message_id": "{{context.headers['Message-Id']}}"
-	},
+  },
   "metadata": {
-    "log_transcriptions_enabled": "False",
-    "respond_with_audio_enabled": "False",
-    "language": "{{context.headers['X-Language']}}",
-    "language_configuration": {
-      "en-US": {
-        "min_confidence_percentage": "60",
-        "max_audio_length_secs": "240"
-      },
-      "es-US": {
-        "min_confidence_percentage": "55",
-        "max_audio_length_secs": "240"
+     "log_transcriptions_enabled": "False",
+     "respond_with_audio_enabled": "False",
+     "truncate_lengthy_transcriptions_enabled": "False",
+     "max_transcription_length": "5000",
+     "max_transcription_line_length": "900",
+     "language": "{{context.headers['X-Language']}}",
+     "language_configuration": {
+        "en-US": {
+           "min_confidence_percentage": "60",
+           "max_audio_length_secs": "240"
+        },
+        "es-US": {
+           "min_confidence_percentage": "55",
+           "max_audio_length_secs": "240"
+        },
+        "lid": {
+           "min_confidence_percentage": "55",
+           "max_audio_length_secs": "240"
+        },
+        "default": {
+           "min_confidence_percentage": "55",
+           "max_audio_length_secs": "240"
+        }
+     },
+     "acs_client": {
+        "lid_enabled": "True",
+        "lid_mode": "AtStartHighAccuracy",
+        "profanity_option": "Masked",
+        "tagging_enabled": "False",
+        "tag_value": "test run 1"
       }
-		},
-	  "acs_client": {
-  	  "lid_enabled": "True",
-      "lid_mode": "AtStartHighAccuracy",
-      "profanity_option": "Masked"
-    }
   }
 }

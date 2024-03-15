@@ -11,8 +11,11 @@ import api_tests.tests.http_tests.http_common_test as http_common_test
 
 @pytest.mark.usefixtures('http_listener_fixture')
 @pytest.mark.usefixtures('http_server_fixture')
+@pytest.mark.usefixtures('http_pod_fixture')
 @pytest.mark.httpsanity
 @pytest.mark.httpregression
+@pytest.mark.httppodregression
+@pytest.mark.httppodsanity
 def test_sanity(http_sanity_test):
     test_data = http_sanity_test
     response = http_common_test.test_http(test_data)

@@ -11,6 +11,7 @@ from configparser import ExtendedInterpolation
 import ast
 from timelength import TimeLength
 import v2ticlib.constants.constants as Constants
+import v2ticlib.constants.fields as Fields
 
 def get_env_property(base:str, property:str):
     base = base.replace('.', '_')
@@ -89,6 +90,9 @@ def get_client_key_file():
 
 def get_client_trusted_certs_path():
     return get_property(config_base, 'client_trusted_certs_path')
+
+def is_lid_fallback_enabled():
+    return get_property(Fields.ACS_CLIENT, Fields.LID_TYPE, False) == Constants.LID_FALLBACK
 
 def get_locking_default_timeout():
     return get_timelength_property_secs(config_base, 'locking_default_timeout')

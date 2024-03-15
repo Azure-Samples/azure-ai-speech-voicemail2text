@@ -44,10 +44,9 @@ Open the project in [Visual Studio Code](https://code.visualstudio.com/download)
 >
 > **Examples**: 
 1. 1 pair of speech key and endpoint. Region failover is not enabled
- `SPEECH_RESOURCES := [('******************************8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2')]`
+ `SPEECH_RESOURCES := "[('******************************8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2')]"`
 2. 2 pairs of speech key and endpoint. Region failover is enabled
-`SPEECH_RESOURCES := [('******************************8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2'), ('******************************fe','wss://eastus.stt.speech.microsoft.com/speech/universal/v2')]`
-
+`SPEECH_RESOURCES := "[('******************************8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2'), ('******************************fe','wss://eastus.stt.speech.microsoft.com/speech/universal/v2')]"`
 
 **Optional**: If needed, modify the _configmap-file.yaml_ file to override configuration values under etc/deployments.
 
@@ -88,7 +87,10 @@ make deploy_pod deployment=<name-of-deployment> image_name=<customized-image-nam
 > [!IMPORTANT]
 > You **must** have executed steps as part of Prerequisites -> Option 2: **_Client-side_**. This step must also be performed in a new Git Bash terminal
 
-Make a note of `<pod_ip>` and `<node_port>` displayed on screen after execution of make deploy_pod or make quick_start.
+Make a note of `<pod_ip>` and `<node_port>` displayed on screen after execution of make deploy_pod or make quick_start. If '<pod_ip>' is blank then get pod_ip using below command
+```bash
+kubectl get pod -l app=<name-of-deployment> -o jsonpath='{.items[*].status.hostIP}'
+```
 
 a) Start the sample https/smtp listener.
 ```bash
@@ -214,7 +216,7 @@ pip install -r requirements.txt
 
 ### Run test cases
 ```bash
-pytest ./tests/api_tests -k regression --capture=tee-sys
+pytest ./tests/api_tests -k regression --capture=tee-sys -s
 pytest ./tests/unit_tests
 ```
 
