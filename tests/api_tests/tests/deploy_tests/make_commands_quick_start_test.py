@@ -11,6 +11,6 @@ from api_tests.app.system_utils.make_utils import MakeUtils
 @pytest.mark.makecommandquickstart
 def test_make_quick_start():
     make_utils = MakeUtils()
-    make_utils.quick_start()
+    make_utils.quick_start(deployment='https')
     make_utils.destroy_pod(deployment='https')
     make_utils.clean(deployment='https')

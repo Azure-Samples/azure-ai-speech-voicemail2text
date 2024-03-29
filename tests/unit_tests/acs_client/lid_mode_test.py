@@ -19,14 +19,14 @@ class TestLidModeUtils(unittest.TestCase):
         request_creator = RequestCreator()
         request = request_creator.create_acs_client_with_field_value('True','AtStartHighAccuracy','Raw')
         language_configuration_utils.resolve(request)
-        acs_client = request[Fields.METADATA][Fields.ACS_CLIENT]    
+        acs_client = request[Fields.METADATA][Fields.ACS_CLIENT]
         assert acs_client[Fields.LID_MODE] == 'AtStartHighAccuracy'
 
     def test_lid_mode_value_Continuous_injected_in_dictionary_at_runtime(self):
         request_creator = RequestCreator()
         request = request_creator.create_acs_client_with_field_value('True','Continuous','Masked')
         language_configuration_utils.resolve(request)
-        acs_client = request[Fields.METADATA][Fields.ACS_CLIENT]    
+        acs_client = request[Fields.METADATA][Fields.ACS_CLIENT]
         assert acs_client[Fields.LID_MODE] == 'Continuous'
 
     def test_lid_mode_value_AtStart_injected_in_dictionary_at_runtime(self):

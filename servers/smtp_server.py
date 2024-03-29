@@ -156,6 +156,9 @@ async def start_smtp_server():
     while keep_server_alive:
         await asyncio.sleep(1)
 
+    print('==============Stopping SMTP Server==============')
+    controller.stop()
+
 def stop_server():
     global keep_server_alive
     keep_server_alive = False

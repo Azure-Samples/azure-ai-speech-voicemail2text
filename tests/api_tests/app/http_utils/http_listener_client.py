@@ -18,16 +18,18 @@ class HTTPListenerClient:
 
     def __init__(self):
         self.http_listener_server = HTTPListenerServer()
+        self.server_thread = None
 
     def start(self):
 
-        server_thread = threading.Thread(target=self.http_listener_server.start_listener,
+        self.server_thread = threading.Thread(target=self.http_listener_server.start_listener,
                                              args=(HTTPListenerClient.listener_host, HTTPListenerClient.listener_port))
-        server_thread.start()
+        self.server_thread.start()
 
 
     def stop(self):
         self.http_listener_server.stop_listener()
+        self.server_thread.join()
         time.sleep(5)
         self.http_listener_server.reset_stop_server_flag()
 

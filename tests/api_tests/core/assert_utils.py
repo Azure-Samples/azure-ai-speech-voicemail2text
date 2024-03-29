@@ -5,6 +5,7 @@
 
 import os
 import traceback
+import re
 from api_tests.core.reporter import reporter
 from api_tests.core.constants.http_status_code import HttpStatusCode
 from api_tests.core.config_utils import get_config_value
@@ -16,7 +17,7 @@ def validate_request_ack_status_bad_request(actual_status_code):
 
 def validate_request_ack_status_status_accepted(actual_status_code):
     expected_status_code=HttpStatusCode.ACCEPTED.value
-    validate(actual_status_code, expected_status_code, 'validate http request ack status code')
+    validate(expected_status_code, actual_status_code, 'validate http request ack status code')
 
 def validate_request_ack_status_status_smtp_request(actual_status_code):
     expected_status_code='Message accepted for delivery'
@@ -179,6 +180,17 @@ def validate_original_audio_in_response(test_data, response):
     audio_string_from_file = str(read_from_file(audio_path), 'ascii').replace('\n', '').replace('\r', '')
     audio_string_from_response = response['body'].get('audio').replace('\n', '').replace('\r', '')
     assert audio_string_from_file == audio_string_from_response
+
+def validate_speech_key_endpoint_in_logs(test_data, logs_output):
+    pattern = re.compile(r'.*Using speech resource.*', re.MULTILINE)
+    matches = pattern.findall(logs_output)
+    result = re.search('.*Using speech resource: Key: (.*), Endpoint: (.*)$', ''.join(matches))
+    speech_key_from_log = result.group(1)
+    endpoint_from_log = result.group(2)
+    assert test_data['speech_key'] == speech_key_from_log
+    reporter.report('validate speech key', f"Expected - {test_data['speech_key']} is used")
+    assert test_data['speech_endpoint'] == endpoint_from_log
+    reporter.report('validate speech endpoint', f"Expected - {test_data['speech_endpoint']} is used")
 
 def validate_after_deposit_ack_smtp_request(after_deposit_ack_response):
     email_subject = after_deposit_ack_response['headers']['Subject']

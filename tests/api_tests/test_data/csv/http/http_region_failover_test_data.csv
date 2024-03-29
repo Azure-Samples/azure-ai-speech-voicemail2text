@@ -1,0 +1,5 @@
+language,audio_file,content_encoding,content_type,status,recognition_status,speech_key,speech_endpoint
+en-US,en-US.txt,base64,text/plain,Success,Timeout,******************************8b,wss://westus.stt.speech.microsoft.com/speech/universal/v2
+en-US,en-US.txt,base64,text/plain,Success,Timeout,******************************8b,wss://westus.stt.speech.microsoft.com/speech/universal/v2
+en-US,en-US.txt,base64,text/plain,Success,Timeout,******************************8b,wss://westus.stt.speech.microsoft.com/speech/universal/v2
+en-US,en-US.txt,base64,text/plain,Success,Timeout,******************************fe,wss://eastus.stt.speech.microsoft.com/speech/universal/v2

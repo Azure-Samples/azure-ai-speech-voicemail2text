@@ -33,7 +33,7 @@ def set_env_transcoding_timeout_fixture(request):
 @pytest.mark.usefixtures('set_env_transcoding_timeout_fixture')
 @pytest.mark.httptranscodingtimeout
 @pytest.mark.httpregression
-def test_sanity(http_transcoding_timeout_test):
+def test_transcoding_timeout(http_transcoding_timeout_test):
     test_data = http_transcoding_timeout_test
     response = http_common_test.test_http(test_data)
     if os.name != "nt":

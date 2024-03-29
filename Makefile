@@ -1,6 +1,6 @@
 #By declaring targets as .PHONY, we ensure that the associated commands are always executed, regardless of the existence of files or directories with the same names as the targets.
 
-.PHONY: default_make build_image check_minikube_status start_minikube load_image deploy_pod start_dashboard get_status destroy_pod enable_autoscale destroy_autoscale ssh_pod clean quick_start test_local
+.PHONY: default_make build_image check_minikube_status start_minikube load_image deploy_pod start_dashboard get_status destroy_pod enable_autoscale destroy_autoscale ssh_pod clean quick_start test_local test_pod test_deploy_pod test_quick_start_https test_clean
 
 # Input speech key and endpoint tuple list (public or private) to get started
 SPEECH_RESOURCES := "[('bac6a970e42345dc877be170eefc9c8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2')]"
@@ -21,14 +21,14 @@ default_make:
 
 test_local:
 	@echo "Running regression tests locally.";\
-	pytest ./tests/api_tests -k regression --capture=tee-sys;\
+	pytest ./tests/api_tests -k regression --capture=tee-sys -s;\
 	echo "Regression execution completed."
 	@echo "Running unit tests locally.";\
 	pytest ./tests/unit_tests
 
 build_image:
 	@eval "export IMAGE_NAME=$(if $(image_name),$(image_name),$(DEFAULT_IMAGE_NAME))_$(shell date +'%Y%m%d-%H%M%S')";\
-    docker build -t $$IMAGE_NAME . ;\
+	docker build -t $$IMAGE_NAME . ;\
 	echo "Image Name: $$IMAGE_NAME"
 
 check_minikube_status:
@@ -41,7 +41,7 @@ start_minikube:
 	@if echo "$(MINIKUBE_STATUS)" | grep -q "Running"; then \
     		echo "Minikube is already running"; \
 	else \
-    		minikube start --driver docker; \
+    		minikube start --driver docker --force; \
     	fi
 
 load_image:
@@ -53,35 +53,50 @@ load_image:
 	minikube image load scratch/image.tar ;\
 	rm -rf scratch
 
+kubectl_deploy_resource:
+	@eval export source_file=$(source_file);\
+	export destination_file=$(destination_file);\
+	envsubst < $(source_file) > $(destination_file);\
+	kubectl apply -f $(destination_file);\
+
 deploy_pod:
-	@eval "export DEPLOYMENT=$(deployment)" ;\
+	@export BASE_DIR=$(base_dir);\
+	eval "export DEPLOYMENT=$(deployment)";\
 	echo "Deploying $$DEPLOYMENT" ;\
-	export DEPLOY_IMAGE_NAME=$(image_name) ;\
-	export SPEECH_RESOURCES=$(SPEECH_RESOURCES) ;\
+	export DEPLOY_IMAGE_NAME=$(image_name);\
+	export SPEECH_RESOURCES=$(SPEECH_RESOURCES);\
+	if [ -z "$(base_dir)" ]; then\
+		BASE_DIR=etc;\
+	fi ;\
 	echo $$DEPLOYMENT ;\
 	if [ -z $(SPEECH_RESOURCES) ]; then\
 		echo "SPEECH_RESOURCES was not provided, please review Makefile and ensure its value is not empty" && exit 1;\
 	fi ;\
-	envsubst < etc/deployments/$$DEPLOYMENT/configmap-file.yaml > etc/deployments/$$DEPLOYMENT/configmap-file-instance.yaml ;\
-	kubectl apply -f etc/deployments/$$DEPLOYMENT/configmap-file-instance.yaml;\
+	base_deployment_dir=$$BASE_DIR/deployments/$$DEPLOYMENT;\
+	echo "BASE_DIR: $$base_deployment_dir";\
+	configmap_source=$$base_deployment_dir/configmap-file.yaml;\
+	configmap_destination=$$base_deployment_dir/configmap-file-instance.yaml;\
+	make kubectl_deploy_resource source_file=$$configmap_source destination_file=$$configmap_destination;\
 	export v2tic_port=$$(kubectl get configmap $$DEPLOYMENT-configmap-file -o jsonpath='{.data.v2tic_port}') && \
 	export v2tic_nodeport=$$(kubectl get configmap $$DEPLOYMENT-configmap-file -o jsonpath='{.data.v2tic_nodeport}') && \
-	envsubst < etc/deployments/$$DEPLOYMENT/deployment-file.yaml > etc/deployments/$$DEPLOYMENT/pod-file.yaml ;\
-	kubectl apply -f etc/deployments/$$DEPLOYMENT/pod-file.yaml;\
+	deployment_source=$$base_deployment_dir/deployment-file.yaml;\
+	deployment_destination=$$base_deployment_dir/pod-file.yaml;\
+	make kubectl_deploy_resource source_file=$$deployment_source destination_file=$$deployment_destination;\
 	export vmcs_label=$$(kubectl get deployment $$DEPLOYMENT-deployment -o jsonpath='{.metadata.labels.app}') && \
 	kubectl wait --for=condition=ready pod -l app=$$vmcs_label ;\
 	export nodeport=$$(kubectl get configmap $$DEPLOYMENT-configmap-file -o jsonpath='{.data.v2tic_nodeport}') ;\
-	echo "Refer README.md section 'Getting Started #6' to run sanity checks on created pod";\
-	echo node_port: "$$nodeport" ;\
 	if echo "$(OS_NAME)" | grep "Linux"; then\
-		export pod_ip="$$(kubectl get pod -l app=$$vmcs_label -o jsonpath='{.items[*].status.hostIP}')" ;\
-		echo pod_ip: "$$pod_ip" ;\
-		echo For deployment $$DEPLOYMENT send traffic to "$$pod_ip:$$nodeport" ;\
 		echo "Skipping port-forward on Linux" ;\
+		export POD_IP=$$(kubectl get pod -l app=$$vmcs_label -o jsonpath='{.items[*].status.hostIP}') ;\
 	else \
-		echo pod_ip: "127.0.0.1" ;\
-		kubectl port-forward service/$$DEPLOYMENT-service $$v2tic_nodeport:$$v2tic_port;\
-	fi
+		kubectl port-forward service/$$DEPLOYMENT-service $$v2tic_nodeport:$$v2tic_port & \
+		export POD_IP="127.0.0.1" ;\
+	fi ;\
+	echo pod_ip: "$$POD_IP" ;\
+	echo node_port: "$$nodeport" ;\
+	echo For deployment $$DEPLOYMENT send traffic to: "$$POD_IP:$$nodeport" ;\
+	echo "" ;\
+	echo "Refer README.md section 'Getting Started #6' to run sanity checks on created pod"
 
 start_dashboard:
 	minikube dashboard
@@ -91,23 +106,31 @@ get_status:
 
 destroy_pod:
 	@export DEPLOYMENT=$(deployment);\
-	kubectl delete deployment.apps/$$DEPLOYMENT-deployment service/$$DEPLOYMENT-service configmap/$$DEPLOYMENT-configmap-file
+	kubectl delete deployment.apps/$$DEPLOYMENT-deployment service/$$DEPLOYMENT-service configmap/$$DEPLOYMENT-configmap-file --force --grace-period=0
 
 clean:
 	@export DEPLOYMENT=$(deployment); \
-	if [ -f "etc/deployments/$$DEPLOYMENT/pod-file.yaml" ]; then \
-    		echo "About to delete etc/deployments/$$DEPLOYMENT/pod-file.yaml"; \
-    		rm -f "etc/deployments/$$DEPLOYMENT/pod-file.yaml"; \
-    		echo "Deleted pod-file.yaml"; \
+	export BASE_DIR=$(base_dir);\
+	if [ -z "$(base_dir)" ]; then\
+		BASE_DIR=etc;\
+	fi ;\
+	base_deployment_dir=$$BASE_DIR/deployments/$$DEPLOYMENT;\
+	echo "BASE_DIR: $$base_deployment_dir";\
+	configmap_file_instance=$$base_deployment_dir/configmap-file-instance.yaml;\
+	pod_file=$$base_deployment_dir/pod-file.yaml;\
+	if [ -f "$$pod_file" ]; then \
+    		echo "About to delete $$pod_file"; \
+    		rm -f "$$pod_file"; \
+    		echo "Deleted $$pod_file"; \
 	else \
-		echo "File etc/deployments/$$DEPLOYMENT/pod-file.yaml doesn't exist. Skipping deletion."; \
+		echo "File $$pod_file doesn't exist. Skipping deletion."; \
 	fi;\
-	if [ -f "etc/deployments/$$DEPLOYMENT/configmap-file-instance.yaml" ]; then \
-    		echo "About to delete etc/deployments/$$DEPLOYMENT/configmap-file-instance.yaml"; \
-    		rm -f "etc/deployments/$$DEPLOYMENT/configmap-file-instance.yaml"; \
-    		echo "Deleted configmap-file-instance.yaml"; \
+	if [ -f "$$configmap_file_instance" ]; then \
+    		echo "About to delete $$configmap_file_instance"; \
+    		rm -f "$$configmap_file_instance"; \
+    		echo "Deleted $$configmap_file_instance"; \
 	else \
-		echo "File etc/deployments/$$DEPLOYMENT/configmap-file-instance.yaml doesn't exist. Skipping deletion."; \
+		echo "File $$configmap_file_instance doesn't exist. Skipping deletion."; \
 	fi ;\
 	rm -rf scratch
 
@@ -126,13 +149,31 @@ ssh_pod:
 
 quick_start:
 	@export DEPLOYMENT=$(deployment);\
-	export IMAGE_NAME=$(DEFAULT_IMAGE_NAME)_$(shell date +'%Y%m%d-%H%M%S') ;\
+	export BASE_DIR=$(base_dir);\
+	if [ -z "$(base_dir)" ]; then\
+		BASE_DIR=etc;\
+	fi ;\
+	if [ -z "$(image_name)" ]; then\
+		IMAGE_NAME=$(DEFAULT_IMAGE_NAME)_$(shell date +'%Y%m%d-%H%M%S') ;\
+	fi ;\
 	docker build -t $$IMAGE_NAME . ;\
 	echo "Image Name: $$IMAGE_NAME" ;\
 	make start_minikube ;\
 	make load_image image_name=$$IMAGE_NAME ;\
-	make deploy_pod deployment=$$DEPLOYMENT image_name=$$IMAGE_NAME
+	make deploy_pod base_dir=$$BASE_DIR deployment=$$DEPLOYMENT image_name=$$IMAGE_NAME
 
 display_pod_logs:
 	@export POD_NAME=$(pod_name);\
 	kubectl logs -f $$POD_NAME
+
+test_pod:
+	@echo "Running regression tests on pod.";\
+	if echo "$(OS_NAME)" | grep "Linux"; then\
+		pytest ./tests/api_tests -k podregression --capture=tee-sys --setup_local_server=False;\
+	else \
+		minikube delete ;\
+		pytest ./tests/api_tests -k httppodregression --capture=tee-sys --setup_local_server=False;\
+		minikube delete ;\
+		pytest ./tests/api_tests -k smtppodregression --capture=tee-sys --setup_local_server=False;\
+	fi	;\
+	echo "Regression execution completed."

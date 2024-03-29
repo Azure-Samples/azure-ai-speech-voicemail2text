@@ -13,9 +13,11 @@ from api_tests.core.assert_utils import validate_lid_response
 
 @pytest.mark.usefixtures('http_listener_fixture')
 @pytest.mark.usefixtures('http_server_fixture')
+@pytest.mark.usefixtures('http_pod_fixture')
 @pytest.mark.fixt_data()
 @pytest.mark.httplid
 @pytest.mark.httpregression
+@pytest.mark.httppodregression
 def test_audio_is_transcribed_using_lid(http_lid_test):
     test_data = http_lid_test
     response = http_common_test.test_http(test_data)

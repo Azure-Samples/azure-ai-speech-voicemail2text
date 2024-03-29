@@ -218,7 +218,7 @@ pip install -r requirements.txt
 
 ### Run test cases
 ```bash
-pytest ./tests/api_tests -k regression --capture=tee-sys
+pytest ./tests/api_tests -k regression --capture=tee-sys -s
 pytest ./tests/unit_tests
 ```
 

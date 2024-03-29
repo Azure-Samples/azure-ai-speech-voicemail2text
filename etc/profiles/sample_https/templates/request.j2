@@ -7,6 +7,9 @@
   "metadata": {
      "log_transcriptions_enabled": "False",
      "respond_with_audio_enabled": "False",
+     "truncate_lengthy_transcriptions_enabled": "False",
+     "max_transcription_length": "5000",
+     "max_transcription_line_length": "900",
      "language": "{{context.headers['X-Language']}}",
      "language_configuration": {
         "en-US": {
@@ -29,7 +32,9 @@
      "acs_client": {
         "lid_enabled": "True",
         "lid_mode": "AtStartHighAccuracy",
-        "profanity_option": "Masked"
+        "profanity_option": "Masked",
+        "tagging_enabled": "False",
+        "tag_value": "test run 1"
       }
   }
 }

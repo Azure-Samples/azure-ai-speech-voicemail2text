@@ -12,12 +12,13 @@ from api_tests.core.listeners.http_listeners.request_handler import RequestHandl
 from api_tests.core.config_utils import get_config_value
 
 class HTTPListenerServer:
-    stop_server_flag = False
+    # stop_server_flag = False
 
     def __init__(self):
         self.cert_file = get_config_value("certs", "listener_cert_file")
         self.key_file = get_config_value("certs", "listener_key_file")
         self.client_cert_file = get_config_value("certs", "client_cert_file")
+        self.stop_server_flag = False
 
     def create_ssl_context(self):
         ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_SERVER)
@@ -39,7 +40,7 @@ class HTTPListenerServer:
         print(f"===Test HTTP Listener started on host {host} and port {port}===")
         # Wait for the user to stop the server
         try:
-            while not HTTPListenerServer.stop_server_flag:
+            while not self.stop_server_flag:
                 pass
         except KeyboardInterrupt:
             pass
@@ -47,11 +48,14 @@ class HTTPListenerServer:
         # Stop the server gracefully
         http_server.shutdown()
         http_server.server_close()
+        # Wait for the server thread to stop
+        server_thread.join()
+
 
     def stop_listener(self):
         # Set the stop_server_flag to True to stop the server
-        HTTPListenerServer.stop_server_flag = True
+        self.stop_server_flag = True
 
     def reset_stop_server_flag(self):
         # Set the stop_server_flag to True to stop the server
-        HTTPListenerServer.stop_server_flag = False
+        self.stop_server_flag = False

@@ -12,9 +12,11 @@ from api_tests.core.assert_utils import validate_request_ack_status_status_bad_s
 
 
 @pytest.mark.usefixtures('smtp_server_fixture')
+@pytest.mark.usefixtures('smtp_pod_fixture')
 @pytest.mark.smtpemptyaudio
 @pytest.mark.asyncio
 @pytest.mark.smtpregression
+@pytest.mark.smtppodregression
 async def test_smtp_empty_audio(smtp_empty_audio_test):
     test_data = smtp_empty_audio_test
     try:

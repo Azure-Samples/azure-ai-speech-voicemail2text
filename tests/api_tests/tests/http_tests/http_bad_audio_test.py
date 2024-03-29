@@ -12,8 +12,10 @@ from api_tests.core.assert_utils import validate_notes
 
 @pytest.mark.usefixtures('http_listener_fixture')
 @pytest.mark.usefixtures('http_server_fixture')
+@pytest.mark.usefixtures('http_pod_fixture')
 @pytest.mark.httpbadaudio
 @pytest.mark.httpregression
+@pytest.mark.httppodregression
 def test_bad_audio(http_bad_audio_test):
     test_data = http_bad_audio_test
     response = http_common_test.test_http(test_data)

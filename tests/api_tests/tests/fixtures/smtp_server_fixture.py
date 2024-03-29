@@ -4,7 +4,7 @@
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
 import api_tests.app.local_setup.setup_local_smtp_server as local_smtp_server
-import threading
+import threading, os
 import pytest
 from api_tests.core.reporter import reporter
 
@@ -20,6 +20,11 @@ def smtp_server_fixture(request):
         server_thread.start()
         if local_smtp_server.has_local_smtp_server_started():
             reporter.report("====smtp_server_fixture -> LOCAL SMTP SERVER STARTED===")
+
+    # Modify server port to nodeport if setup_local_server is false
+    if setup_local_server.lower() == "false":
+        #os.environ['httptest_server_url'] = 'https://127.0.0.1'
+        os.environ['httptest_server_port'] = "32001"
 
     yield
 

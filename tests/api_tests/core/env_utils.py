@@ -9,4 +9,4 @@ def set_os_env(env_key, env_value):
     os.environ[env_key] = env_value
 
 def unset_os_env(env_key):
-    os.unsetenv(env_key)
+    del os.environ[env_key]

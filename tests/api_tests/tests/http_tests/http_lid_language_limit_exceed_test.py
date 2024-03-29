@@ -16,6 +16,7 @@ from api_tests.core.assert_utils import validate_recognition_status, validate_li
 @pytest.mark.fixt_data()
 @pytest.mark.httpexceedlimit
 @pytest.mark.httpregression
+@pytest.mark.httppodregression
 def test_audio_is_transcribed_using_lid_exceed_limit(http_lid_language_limit_exceed_test):
     test_data = http_lid_language_limit_exceed_test
     response = http_common_test.test_http(test_data)
