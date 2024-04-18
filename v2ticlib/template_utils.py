@@ -15,6 +15,7 @@ import v2ticlib.constants.constants as Constants
 import v2ticlib.converter_utils as converter_utils
 import v2ticlib.request_utils as request_utils
 import v2ticlib.header_utils as header_utils
+import v2ticlib.json_utils as json_utils
 
 class TemplateTypeEnums(enum.Enum):
     request = 'request.j2'
@@ -135,7 +136,7 @@ class TemplateUtils():
 
     def _do_render_as_json(self, template_type: TemplateTypeEnums, context, context_key=None):
         string = self._do_render(template_type.value, context, context_key)
-        return json.loads(string)
+        return json.loads(string, strict=json_utils.get_enable_strict_mode())
 
     def _do_render(self, template_name: str, context, context_key=None):
         key = string_utils.default_if_empty(context_key, TemplateTypeEnums.request.name)

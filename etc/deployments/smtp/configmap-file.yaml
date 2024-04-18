@@ -18,6 +18,9 @@ data:
   v2tic_config_file_path: /app/etc/config/config.properties
   v2tic_locking_default_timeout: 300 seconds
 
+  json_enable_strict_mode: "True"
+  json_replace_characters_list: [('"', '\\"')]
+
   smtp_client_cert_file: /app/etc/certs/client/certificate.pem
   smtp_client_key_file: /app/etc/certs/client/private_key.pem
   smtp_response_port: "9025"

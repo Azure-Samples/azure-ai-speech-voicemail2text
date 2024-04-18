@@ -22,7 +22,8 @@ class ResponseCreator():
             self.update_recognition_result(request)
             status = Constants.SUCCESS
         request_utils.set_status(request, status)
-        return template_utils.render_response(request)
+        updated_request = request_utils.update_request_with_escaped_values(request)
+        return template_utils.render_response(updated_request)
 
     def update_recognition_result(self, request):
         recognition_result:dict = request_utils.get_recognition_result(request)

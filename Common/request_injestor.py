@@ -11,13 +11,15 @@ from v2ticlib.template_utils import template_utils
 import v2ticlib.language_configuration_utils as language_configuration_utils
 import v2ticlib.request_utils as request_utils
 import v2ticlib.audio_utils as audio_utils
+import v2ticlib.header_utils as header_utils
 
 class RequestInjestor():
     def __init__(self):
         self._request_validator = RequestValidator()
 
     def injest(self, initial_request_content:dict, headers:typing.Mapping[str, str], body:bytes):
-        request = template_utils.render_request(initial_request_content, headers)
+        updated_headers = header_utils.update_headers_with_escaped_values(headers)
+        request = template_utils.render_request(initial_request_content, updated_headers)
         language_configuration_utils.resolve(request)
         self.resolve_audio(request, body)
         self._request_validator.validate(request)

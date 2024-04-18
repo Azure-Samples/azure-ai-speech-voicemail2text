@@ -12,6 +12,7 @@ import v2ticlib.constants.fields as Fields
 import v2ticlib.constants.constants as Constants
 import v2ticlib.string_utils as string_utils
 import v2ticlib.metadata_utils as metadata_utils
+import v2ticlib.json_utils as json_utils
 from functools import partial
 import ast
 
@@ -198,3 +199,6 @@ def set_speech_resource(request, speech_resource):
 
 def get_speech_resource(request):
     return get_field(request, Fields.SPEECH_RESOURCE)
+
+def update_request_with_escaped_values(request:dict):
+    return json_utils.update_json_values(request)

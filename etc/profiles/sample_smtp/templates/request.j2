@@ -5,7 +5,14 @@
     "to": "{{context.headers.To}}",
     "mail_from": "{{context.headers['Reply-To']}}",
     "reply_to": "{{context.headers.From}}",
-    "message_id": "{{context.headers['Message-Id']}}"
+    "message_id": "{{context.headers['Message-Id']}}",
+    "x_uonecallid": "{{context.headers['X-uOneCallID']}}",
+    "x_uonecalledid": "{{context.headers['X-uOneCalledID']}}",
+    "x_test_v2t_verification": "{{context.headers['x-test-v2t-verification']}}",
+    "x_test_v2t_referenceid": "{{context.headers['x-test-v2t-referenceid']}}",
+    "x_test_service": "{{context.headers['x-test-service']}}",
+    "x_v2treply": "{{context.headers['X-V2TReply']}}",
+    "subject": "{{context.headers.Subject}}"
   },
   "metadata": {
      "log_transcriptions_enabled": "False",

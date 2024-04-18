@@ -15,7 +15,13 @@
      "Subject": "{{request.pass_through_data.message_id}}",
      "X-Reference": "{{request.headers['X-Reference']}}",
      "Content-Transfer-Encoding":"7bit",
-     "Connection": "close"
+     "Connection": "close",
+     "X-test-v2t_verification": "{{request.pass_through_data.x_test_v2t_verification}}",
+     "X-test-v2t_referenceid": "{{request.pass_through_data.x_test_v2t_referenceid}}",
+     "X-test-service": "{{request.pass_through_data.x_test_service}}",
+     "X-uonecallid": "{{request.pass_through_data.x_uonecallid}}",
+     "X-uonecalledid": "{{request.pass_through_data.x_uonecalledid}}",
+     "Subject":  "{{request.headers.Subject}}"
    },
    "body": {
       "import": "response_body.j2",

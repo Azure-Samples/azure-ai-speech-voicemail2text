@@ -5,12 +5,17 @@
 
 
 
-from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
 from api_tests.core.smtp_utils.smtp_send_email import send_email
 
 async def send_email_with_audio(test_data:dict, headers:dict, content):
-    message = MIMEText("email")
+    
 
+    message = MIMEMultipart()
+    message['From'] = test_data['sender_email']
+    message['To'] = ', '.join(test_data['receiver_email'])
+    message['Subject'] = 'Test email'
     for k, v in headers.items():
         message.add_header(k, v)
 
