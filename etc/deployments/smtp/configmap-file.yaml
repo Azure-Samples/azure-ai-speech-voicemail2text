@@ -19,7 +19,7 @@ data:
   v2tic_locking_default_timeout: 300 seconds
 
   json_enable_strict_mode: "True"
-  json_replace_characters_list: [('"', '\\"')]
+  json_replace_characters_list: "[('\"', '\\\\\"')]"
 
   smtp_client_cert_file: /app/etc/certs/client/certificate.pem
   smtp_client_key_file: /app/etc/certs/client/private_key.pem
@@ -82,6 +82,6 @@ data:
   acs_client_sdk_logs_log_filename: /app/sdk.log
   # fail-safe timeout the ACS request if still active 30 seconds after audio_mulitplier*audio_length seconds
   acs_client_fail_safe_timeout: 30 seconds
-  acs_client_speech_resources: "$SPEECH_RESOURCES"
+  acs_client_speech_resources: $SPEECH_RESOURCES
   acs_client_region_failover_threshold: "3"
   acs_client_region_failover_enabled: "True"

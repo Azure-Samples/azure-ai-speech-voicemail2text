@@ -13,15 +13,16 @@ def get_enable_strict_mode():
 def get_replace_characters_list():
     return config_utils.get_property(Constants.JSON, 'replace_characters_list', literal_eval=True)
 
+def escape(s:str, key, val):
+    return s.replace(val, '\v').replace(key, val).replace('\v', val)
+
 def replace_characters(string_value):
     if not isinstance(string_value, str):
         return string_value
     for replace_char_tuple in get_replace_characters_list():
         key = replace_char_tuple[0]
         value = replace_char_tuple[1]
-        if value in string_value:
-            continue
-        string_value = string_value.replace(key, value)
+        string_value = escape(string_value, key, value)
     return string_value
 
 def update_json_values(obj):
