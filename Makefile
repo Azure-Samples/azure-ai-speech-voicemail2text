@@ -87,7 +87,7 @@ deploy_pod:
 	export nodeport=$$(kubectl get configmap $$DEPLOYMENT-configmap-file -o jsonpath='{.data.v2tic_nodeport}') ;\
 	if echo "$(OS_NAME)" | grep "Linux"; then\
 		echo "Skipping port-forward on Linux" ;\
-		export POD_IP=$$(kubectl get pod -l app=$$vmcs_label -o jsonpath='{.items[*].status.hostIP}') ;\
+		export POD_IP="$$(kubectl get pod -l app=$$vmcs_label -o jsonpath='{.items[*].status.hostIP}')" ;\
 	else \
 		kubectl port-forward service/$$DEPLOYMENT-service $$v2tic_nodeport:$$v2tic_port & \
 		export POD_IP="127.0.0.1" ;\
