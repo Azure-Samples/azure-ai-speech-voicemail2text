@@ -21,12 +21,12 @@ data:
   json_enable_strict_mode: "True"
   json_replace_characters_list: "[('\"', '\\\\\"')]"
 
-  smtp_client_cert_file: /app/etc/certs/client/certificate.pem
-  smtp_client_key_file: /app/etc/certs/client/private_key.pem
   smtp_response_port: "9025"
   smtp_response_host: smtp-listener.v2tic.com
-  smtp_default_response_from: broadviewnetdemo@iot.nuancevm.com
-  smtp_default_response_subject: Nuance V2T Conversion
+  smtp_default_mail_from: v2tic@v2tic.com
+  smtp_default_rcpt_to: customer@integrator.com
+  smtp_default_subject: V2TIC Conversion
+  smtp_default_return_code: 250 Ok
   smtp_use_mailfrom_on_empty_from_header: "True"
   smtp_use_rcpttos_on_empty_to_header: "True"
 
@@ -67,8 +67,6 @@ data:
   #lid_mode, lid_fallback
   acs_client_lid_type: lid_mode
   acs_client_language_id_json: "{'Languages':'','OnSuccess':{'Action':'Recognize'},'OnUnknown':{'Action':'RecognizeWithDefaultLanguage'},'Mode':'DetectAtAudioStart','Priority':'PrioritizeAccuracy'}"
-  acs_client_default_language: en-US
-  acs_client_default_languages: "['en-US', 'es-MX']"
   acs_client_audio_multiplier: "5"
   # Continuous or AtStart or AtStartHighAccuracy
   acs_client_lid_mode: AtStartHighAccuracy

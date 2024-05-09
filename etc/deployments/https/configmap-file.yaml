@@ -58,8 +58,6 @@ data:
   #lid_mode, lid_fallback
   acs_client_lid_type: lid_mode
   acs_client_language_id_json: "{'Languages':'','OnSuccess':{'Action':'Recognize'},'OnUnknown':{'Action':'RecognizeWithDefaultLanguage'},'Mode':'DetectAtAudioStart','Priority':'PrioritizeAccuracy'}"
-  acs_client_default_language: en-US
-  acs_client_default_languages: "['en-US', 'es-MX']"
   acs_client_audio_multiplier: "5"
   # Continuous or AtStart or AtStartHighAccuracy
   acs_client_lid_mode: AtStartHighAccuracy

@@ -37,12 +37,6 @@ class AcsClient():
         value = self.get_property(field, literal_eval)
         return value
 
-    def get_default_language(self):
-        return self.get_property("default_language")
-
-    def get_default_languages(self):
-        return self.get_property("default_languages", literal_eval=True)
-
     def get_audio_multiplier(self):
         return self.get_property("audio_multiplier", literal_eval=True)
 
