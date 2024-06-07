@@ -7,10 +7,16 @@
 
 import email
 from email.message import EmailMessage
+from email.header import Header
+import email.message
 from aiosmtplib import SMTP
 from v2ticlib.logger_utils import log
 import v2ticlib.ssl_context_utils as ssl_context_utils
-import v2ticlib.constants.constants as Constants
+import v2ticlib.constants.headers as Constants
+import v2ticlib.config_utils as config_utils
+
+def get_default_response_encoding() -> str:
+     return config_utils.get_property('smtp', Constants.DEFAULT_RESPONSE_ENCODING)
 
 async def send(smtp_sender_host:str, smtp_sender_port:int, mail_from:str, rcpt_to:str, headers:dict, content:bytes, timeout:int) -> str:
 
@@ -25,11 +31,16 @@ async def send(smtp_sender_host:str, smtp_sender_port:int, mail_from:str, rcpt_t
           return return_code
 
 def create_email_message(headers:dict, content:bytes):
-     headers_list = [f'{k}: {v}' for k, v in headers.items()]
-     headers_str = Constants.CRLF.join(headers_list) + Constants.CRLF
-     mime_document_bytes = headers_str.encode(encoding='ascii')
-     if content is not None:
-          mime_document_bytes += content
+     msg = email.message.Message()
+     for key, value in headers.items():
+          val:str = value
+          if val.isascii():
+               msg[key] = value
+          else:
+               header = Header(value, get_default_response_encoding())
+               msg[key] = header
 
-     email_message:EmailMessage = email.message_from_bytes(mime_document_bytes)
-     return email_message
+     if content is not None:
+          msg.set_payload(content)
+
+     return msg

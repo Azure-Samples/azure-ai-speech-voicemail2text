@@ -3,8 +3,8 @@
 .PHONY: default_make build_image check_minikube_status start_minikube load_image deploy_pod start_dashboard get_status destroy_pod enable_autoscale destroy_autoscale ssh_pod clean quick_start test_local test_pod test_deploy_pod test_quick_start_https test_clean
 
 # Input speech key and endpoint tuple list (public or private) to get started
-SPEECH_RESOURCES := "[('bac6a970e42345dc877be170eefc9c8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2')]"
-#SPEECH_RESOURCES := "[('bac6a970e42345dc877be170eefc9c8b','wss://westus.stt.speech.microsoft.com/speech/universal/v2'), ('05455fd708c344a5a326689856ab16fe','wss://eastus.stt.speech.microsoft.com/speech/universal/v2')]"
+SPEECH_RESOURCES := "[('7e4bc1b7fdd944328cb480d2e4fdff39','wss://westus.stt.speech.microsoft.com/speech/universal/v2')]"
+#SPEECH_RESOURCES := "[('7e4bc1b7fdd944328cb480d2e4fdff39','wss://westus.stt.speech.microsoft.com/speech/universal/v2'), ('05455fd708c344a5a326689856ab16fe','wss://eastus.stt.speech.microsoft.com/speech/universal/v2')]"
 
 # Provide a value of IMAGE_NAME= while calling target build_image, else it will default to 'default_image_<datetimestamp>'
 # Eg: make build_image image_name=image_vmcs_01

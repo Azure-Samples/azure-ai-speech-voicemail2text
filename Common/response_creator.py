@@ -42,6 +42,8 @@ class ResponseCreator():
 
         self.resolve_logging_transcription(request, recognition_result)
 
+        self.resolve_transcription_text_in_recognition_result(request, recognition_result)
+
         request_utils.set_recognition_result(request, recognition_result)
 
     def resolve_truncated_audio(self, request:dict, recognition_result:dict):
@@ -56,11 +58,6 @@ class ResponseCreator():
 
         min_confidence_percentage = request_utils.get_min_confidence_percentage(request)
         recognition_result[Fields.CONVERSION_STATUS] = self.get_conversion_status(recognition_result, min_confidence_percentage)
-        if recognition_result[Fields.CONVERSION_STATUS] == Constants.UNCONVERTIBLE:
-            log(f'recognition was found as {Constants.UNCONVERTIBLE}')
-            recognition_result[Fields.TEXT] = ''
-            recognition_result[Fields.DISPLAY_TEXT] = ''
-            recognition_result[Fields.ITN_TEXT] = ''
 
     def has_conversion_status(self, recognition_result:dict):
         return string_utils.is_not_blank(recognition_result.get(Fields.CONVERSION_STATUS))
@@ -128,3 +125,10 @@ class ResponseCreator():
         if(logging_enabled == False):
             recognition_result_to_log = {key:('**not logging private content**' if key in fields else val) for (key, val) in recognition_result.copy().items()}
         return recognition_result_to_log
+    
+    def resolve_transcription_text_in_recognition_result(self, request:dict, recognition_result:dict):
+        if recognition_result[Fields.CONVERSION_STATUS] == Constants.UNCONVERTIBLE:
+            log(f'recognition was found as {Constants.UNCONVERTIBLE}')
+            recognition_result[Fields.TEXT] = ''
+            recognition_result[Fields.DISPLAY_TEXT] = ''
+            recognition_result[Fields.ITN_TEXT] = ''

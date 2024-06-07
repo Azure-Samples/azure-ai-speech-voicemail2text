@@ -39,7 +39,7 @@ data:
   metadata_max_transcription_length: "5000"
   metadata_respond_with_audio_enabled: "False"
   metadata_max_transcription_line_length: "900"
-
+  
   ejector_retry_max_attempts: "3"
   ejector_retry_wait_exponential_backoff: "[0.5, 1, 2]"
   # ejector_retry_on_exception example for http exceptions:OSError,http.client.HTTPException

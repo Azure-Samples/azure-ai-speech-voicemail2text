@@ -9,13 +9,6 @@ from email.header import decode_header as email_decode_header
 import v2ticlib.json_utils as json_utils
 import typing
 
-def encode_header(header_value:str, encoding:str='utf-8') -> str:
-    header = Header(header_value, encoding)
-    message = Message()
-    message['header_name'] = header
-    string_message = message.as_string()
-    return string_message.split(':')[1].strip()
-
 def decode_header(header: Header) -> str:
     if header is None:
         return None

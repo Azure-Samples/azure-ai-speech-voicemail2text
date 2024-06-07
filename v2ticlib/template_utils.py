@@ -14,7 +14,6 @@ import v2ticlib.constants.fields as Fields
 import v2ticlib.constants.constants as Constants
 import v2ticlib.converter_utils as converter_utils
 import v2ticlib.request_utils as request_utils
-import v2ticlib.header_utils as header_utils
 import v2ticlib.json_utils as json_utils
 import v2ticlib.logger_utils as logger_utils
 
@@ -117,10 +116,7 @@ class TemplateUtils():
 
         # assume header is a dict and needs rendering
         header_str:str = self._render_import(header_value, context)
-
-        encoding = header_value[Fields.ENCODING]
-
-        return header_utils.encode_header(header_str, encoding)
+        return header_str
 
     def _render_body(self, body, context):
         if body is None or type(body) == str:

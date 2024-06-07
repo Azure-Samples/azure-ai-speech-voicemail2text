@@ -29,6 +29,7 @@ data:
   smtp_default_return_code: 250 Ok
   smtp_use_mailfrom_on_empty_from_header: "True"
   smtp_use_rcpttos_on_empty_to_header: "True"
+  smtp_default_response_encoding: "utf-8"
 
   profiles_folder: /app/etc/profiles/sample_smtp
   profiles_profile: etc.profiles.sample_smtp.profile.SampleSmtpProfile
@@ -48,7 +49,7 @@ data:
   metadata_max_transcription_length: "5000"
   metadata_respond_with_audio_enabled: "False"
   metadata_max_transcription_line_length: "900"
-
+  
   ejector_retry_max_attempts: "3"
   ejector_retry_wait_exponential_backoff: "[0.5, 1, 2]"
   # ejector_retry_on_exception example for http exceptions:OSError,http.client.HTTPException
