@@ -7,7 +7,7 @@ python-dateutil
 tenacity
 timelength
 requests
-certifi == 2023.7.22
+certifi == 2024.7.4
 pytest
 pytest-csv
 pytest-mock
