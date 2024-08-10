@@ -1,6 +1,6 @@
 azure-cognitiveservices-speech
 Jinja2 == 3.1.3
-aiohttp == 3.9.0
+aiohttp == 3.9.4
 aiosmtplib
 aiosmtpd
 python-dateutil
